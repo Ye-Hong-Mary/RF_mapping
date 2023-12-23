@@ -359,7 +359,7 @@ end
                     continue_trial = false;
                 end
             else 
-                onInvalidTrial(TrialRecord, 'Maximum saccade time elapsed without selection', 1, 4);
+                onInvalidTrial(TrialRecord, 'Maximum saccade time elapsed without selection', 2, 4);
                 continue_trial = false;
         % elseif Settings.DIS.Enabled && wh6d_dis.Success
         %     rt = wh6d_dis.AcquiredTime - response_window_start;
