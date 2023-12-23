@@ -1,5 +1,5 @@
 %
-% rf_mapping.m
+% VGS_RFmapping.m
 % VGS with random locations or inRF/outRF locations
 % Mary Ye Hong
 %
@@ -348,21 +348,24 @@ end
     if continue_trial
         dashboard(1, 'Response window');
         response_window_start = run_scene(scene4, 106);
-        if wh_saccade.Success
+        
+        if wh_saccade_start.Success 
+            if wh_saccade_end.Success
             % rt = wh4_tg.AcquiredTime - response_window_start;
-            if scene7_enabled
-                wh7.WaitTime = fuzz(Settings.Timing.TGHoldToReward);%, trialtime - response_window_start, Settings.Timing.ResponseWindow);
-            else
-                onCorrectTrial(TrialRecord, 'Success', 6);
+                if scene7_enabled
+                    wh7.WaitTime = fuzz(Settings.Timing.TGHoldToReward);%, trialtime - response_window_start, Settings.Timing.ResponseWindow);
+                else
+                    onCorrectTrial(TrialRecord, 'Success', 6);
+                    continue_trial = false;
+                end
+            else 
+                onInvalidTrial(TrialRecord, 'Maximum saccade time elapsed without selection', 1, 4);
                 continue_trial = false;
-            end
-        elseif wh_saccade_start.Success & ~wh_saccade_end.Success
-            onInvalidTrial(TrialRecord, 'Maximum saccade time elapsed without selection', 1, 4);
-            continue_trial = false;
         % elseif Settings.DIS.Enabled && wh6d_dis.Success
         %     rt = wh6d_dis.AcquiredTime - response_window_start;
         %     onIncorrectTrial(TrialRecord, 'Selected distractor instead of target', 6, 5);
         %     continue_trial = false;
+            end
         else
             onInvalidTrial(TrialRecord, 'Failure to saccade', 1, 4);
             continue_trial = false;
