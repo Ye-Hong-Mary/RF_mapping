@@ -5,10 +5,10 @@
 % 
 %
 
-function [C,timingfile,userdefined_trialholder] = rfmapping_userloop(MLConfig,TrialRecord)
+function [C,timingfile,userdefined_trialholder] = VGS_rfmapping_userloop(MLConfig,TrialRecord)
 
 C = [];
-timingfile = 'rf_mapping.m';
+timingfile = 'VGS_RFmapping.m';
 userdefined_trialholder = '';
 
 persistent RunTime;
