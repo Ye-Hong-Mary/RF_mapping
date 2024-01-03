@@ -30,7 +30,7 @@ set_iti(times.InterTrialInterval);
 
 %% Record Trial parameters for later analysis
 
-% trial_type = TrialRecord.User.trial;
+trial_type = TrialRecord.User.trial;
 % if trial_type.Left
 %     trial_direction = 'Left';
 %     signed_coherence = -signed_coherence;
@@ -39,9 +39,9 @@ set_iti(times.InterTrialInterval);
 % end
 % recent_trlnum = 20;
 
-% % bhv_variable('SignedCoherence', signed_coherence, 'TrialType', trial_type.ScheduleIndex, 'Left', trial_type.Left, 'Coherence', trial_type.Coherence);
+bhv_variable('TG Position', trial_type.TGPosition);
 
-% % dashboard(2, sprintf('Trial type %d (Coherence %g%%, Left Bias %g%%, %s)', trial_type.ScheduleIndex, 100 * trial_type.Coherence, 100 * TrialRecord.User.Settings.Block{trial_type.ScheduleIndex}.LeftBias, trial_direction));
+dashboard(2, sprintf('TG (%g%,%g%)', trial_type.TGPosition(1), trial_type.TGPosition(2)));
 
 % stats = TrialRecord.User.Stats;
 % dashboard(3, sprintf('Left Accuracy: %g%% Right Accuracy: %g%% Total Accuracy: %g%%', 100 * stats.ByDirection.Left.Accuracy, 100 * stats.ByDirection.Right.Accuracy, 100 * stats.All.Accuracy));
@@ -76,7 +76,7 @@ tg_graphic = CircleGraphic(null_);
 tg_graphic.Size = Settings.TG.Size * 2.0;
 tg_graphic.FaceColor = Settings.TG.Color;
 tg_graphic.EdgeColor = tg_graphic.FaceColor;
-tg_graphic.Position = Settings.Position.Target;
+tg_graphic.Position = trial_type.TGPosition;
 
 % if Settings.DIS.Enabled
 %     dis_graphic = CircleGraphic(null_);

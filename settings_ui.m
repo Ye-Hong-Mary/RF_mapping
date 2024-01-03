@@ -16,6 +16,18 @@ function MainUI = settings_ui(Settings)
         rmfield(Settings, 'RepeatStimulusIncorrect');
     end
 
+    if ~isfield(Settings, 'Block')
+        Settings.Block = {};
+        angles = [0,pi/4,pi/2,pi*3/4,pi,pi*5/4,pi*3/2,pi*7/4];
+        eccens = [2,5,10,15];
+        for angle_idx = 1:length(angles)
+            for eccen_idx = 1:length(eccens)
+                x = eccens(eccen_idx)*sin(angles(angle_idx));
+                y = eccens(eccen_idx)*cos(angles(angle_idx));
+                Settings.Block = [Settings.Block,struct('x', round(x,2), 'y', round(y,2), 'TrialCount', 10)];
+            end
+        end
+    end
     % Timingfields = fieldnames(Settings.Timing);
     % for fieldNum = 1:length(Timingfields)
     %     if isstruct(Settings.Timing.(Timingfields{fieldNum})) & isfield(Settings.Timing.(Timingfields{fieldNum}), 'Gaussian')
@@ -57,8 +69,7 @@ function MainUI = settings_ui(Settings)
         {'', @taskTimeControls, Settings}, ...
         {'Reward', @rewardControl, 'Rewards', Settings.Reward}, ...
         {'', @header, 'Repeat Stimulus'}, ...
-        {'RepeatStimulus', @uidropdown, 'Items', {'Never', 'Invalid Trials'}, 'Tag', 'RepeatStimulus'} ...
-        );
+        {'RepeatStimulus', @uidropdown, 'Items', {'Never', 'Invalid Trials'}, 'Tag', 'RepeatStimulus'});
 
     grid = main_cg.Grid;
     grid.Padding = [10, 10, 10, 10];
@@ -175,10 +186,10 @@ function MainUI = settings_ui(Settings)
 
         cg.addControl('', 1, [1 6], @header, title);
         cg.addToRow(2, 1, ...
-            'Target x', {'Targetx', @uieditfield, 'numeric', 'Value', cfg.Target(1), 'Limits', [-inf inf],'ValueDisplayFormat', '%g°'}, ...
+            % 'Target x', {'Targetx', @uieditfield, 'numeric', 'Value', cfg.Target(1), 'Limits', [-inf inf],'ValueDisplayFormat', '%g°'}, ...
             'Center x', {'Centerx', @uieditfield, 'numeric', 'Value', cfg.Center(1), 'Limits', [-inf inf], 'ValueDisplayFormat', '%g°'});
         cg.addToRow(3, 1, ...
-            'Target y', {'Targety', @uieditfield, 'numeric', 'Value', cfg.Target(2), 'Limits', [-inf inf],'ValueDisplayFormat', '%g°'}, ...
+            % 'Target y', {'Targety', @uieditfield, 'numeric', 'Value', cfg.Target(2), 'Limits', [-inf inf],'ValueDisplayFormat', '%g°'}, ...
              'Center y', {'Centery', @uieditfield, 'numeric', 'Value', cfg.Center(2), 'Limits', [-inf inf], 'ValueDisplayFormat', '%g°'});
         % cg.addLabel('Flipped', 4, 1);
         % cg.Grid.RowHeight{4} = 0;
@@ -384,91 +395,91 @@ function MainUI = settings_ui(Settings)
         for i = 1:length(Block)
             s = s + Block{i}.TrialCount;
         end
-        s = sprintf('%d trial types with a total of %d trials per block', length(Block), s);
+        s = sprintf('%d target locations with a total of %d trials per block', length(Block), s);
     end
 
-    % function addRow(src, ~)
-    %     parent = src.Parent;
-    %     parent.UserData.Block{length(parent.UserData.Block) + 1} = struct('LeftBias', 0.5, 'Coherence', 1.0, 'TrialCount', 100);
-    %     lst = findobj(parent, 'Tag', 'ScheduleList');
-    %     scheduleRow(lst, parent.UserData.Block, length(parent.UserData.Block));
-    %     summary = findobj(parent, 'Tag', 'BlockSummary');
-    %     summary.Text = summarizeBlock(parent.UserData.Block);
-    % end
+    function addRow(src, ~)
+        parent = src.Parent;
+        parent.UserData.Block{length(parent.UserData.Block) + 1} = struct('x', 3, 'y', 3, 'TrialCount', 10);
+        lst = findobj(parent, 'Tag', 'ScheduleList');
+        scheduleRow(lst, parent.UserData.Block, length(parent.UserData.Block));
+        summary = findobj(parent, 'Tag', 'BlockSummary');
+        summary.Text = summarizeBlock(parent.UserData.Block);
+    end
 
-    % function removeRow(src, ~)
-    %     row = src.UserData;
-    %     parent = src.Parent.Parent;
-    %     if length(parent.UserData.Block) == 1
-    %         return;
-    %     end
-    %     parent.UserData.Block(row) = [];
-    %     summary = findobj(parent, 'Tag', 'BlockSummary');
-    %     summary.Text = summarizeBlock(parent.UserData.Block);
-    %     old_list = findobj(parent, 'Tag', 'ScheduleList');
-    %     delete(old_list);
-    %     ginsert(parent, 2, [1 2], @scheduleList, parent.UserData.Block);
-    % end
+    function removeRow(src, ~)
+        row = src.UserData;
+        parent = src.Parent.Parent;
+        if length(parent.UserData.Block) == 1
+            return;
+        end
+        parent.UserData.Block(row) = [];
+        summary = findobj(parent, 'Tag', 'BlockSummary');
+        summary.Text = summarizeBlock(parent.UserData.Block);
+        old_list = findobj(parent, 'Tag', 'ScheduleList');
+        delete(old_list);
+        ginsert(parent, 2, [1 2], @scheduleList, parent.UserData.Block);
+    end
 
-    % function onLeftBiasChange(src, ~)
-    %     trial_index = src.UserData.TrialIndex;
-    %     parent = src.Parent.Parent.Parent;
-    %     parent.UserData.Block{trial_index}.LeftBias = src.Value * 0.01;
-    % end
+    function onXChange(src, ~)
+        trial_index = src.UserData.TrialIndex;
+        parent = src.Parent.Parent.Parent;
+        parent.UserData.Block{trial_index}.x = src.Value;
+    end
 
-    % function onCoherenceChange(src, ~)
-    %     trial_index = src.UserData.TrialIndex;
-    %     parent = src.Parent.Parent.Parent;
-    %     parent.UserData.Block{trial_index}.Coherence = src.Value * 0.01;
-    % end
+    function onYChange(src, ~)
+        trial_index = src.UserData.TrialIndex;
+        parent = src.Parent.Parent.Parent;
+        parent.UserData.Block{trial_index}.y = src.Value ;
+    end
 
-    % function onTrialCountChange(src, ~)
-    %     trial_index = src.UserData.TrialIndex;
-    %     parent = src.Parent.Parent.Parent;
-    %     parent.UserData.Block{trial_index}.TrialCount = src.Value;
-    %     summary = findobj(parent, 'Tag', 'BlockSummary');
-    %     summary.Text = summarizeBlock(parent.UserData.Block);
-    % end
+    function onTrialCountChange(src, ~)
+        trial_index = src.UserData.TrialIndex;
+        parent = src.Parent.Parent.Parent;
+        parent.UserData.Block{trial_index}.TrialCount = src.Value;
+        summary = findobj(parent, 'Tag', 'BlockSummary');
+        summary.Text = summarizeBlock(parent.UserData.Block);
+    end
 
-    % function scheduleRow(grid, block, i)
-    %     grid.RowHeight{i} = 'fit';
-    %     ginsert(grid, i, 1, @numberControl, 'Left Bias', 100 * block{i}.LeftBias, 'Limits', [0, 100], 'UserData', struct('TrialIndex', i), 'ValueChangedFcn', @onLeftBiasChange, 'ValueDisplayFormat', '%g%%');
-    %     ginsert(grid, i, 2, @numberControl, 'Coherence', 100 * block{i}.Coherence, 'Limits', [0, 100], 'UserData', struct('TrialIndex', i), 'ValueChangedFcn', @onCoherenceChange, 'ValueDisplayFormat', '%g%%');
-    %     ginsert(grid, i, 3, @numberControl, 'Trial Count', block{i}.TrialCount, 'UserData', struct('TrialIndex', i), 'ValueChangedFcn', @onTrialCountChange);
-    %     ginsert(grid, i, 4, @uibutton, 'Text', 'Remove', 'UserData', i, 'ButtonPushedFcn', @removeRow);
-    % end
+    function scheduleRow(grid, block, i)
+        grid.RowHeight{i} = 'fit';
+        ginsert(grid, i, 1, @numberControl, 'x', block{i}.x, 'Limits', [-inf,inf], 'UserData', struct('TrialIndex', i), 'ValueChangedFcn', @onXChange, 'ValueDisplayFormat', '%g%%');
+        ginsert(grid, i, 2, @numberControl, 'y', block{i}.y, 'Limits', [-inf,inf], 'UserData', struct('TrialIndex', i), 'ValueChangedFcn', @onYChange, 'ValueDisplayFormat', '%g%%');
+        ginsert(grid, i, 3, @numberControl, 'Trial Count', block{i}.TrialCount, 'UserData', struct('TrialIndex', i), 'ValueChangedFcn', @onTrialCountChange);
+        ginsert(grid, i, 4, @uibutton, 'Text', 'Remove', 'UserData', i, 'ButtonPushedFcn', @removeRow);
+    end
 
-    % function grid = scheduleList(parent, block)
-    %     grid = uigridlayout(parent, [length(block), 4], ...
-    %         'Padding', [0, 0, 0, 0], ...
-    %         'ColumnWidth', {'fit', 'fit', 'fit', 'fit'}, ...
-    %         'RowHeight', {'fit'}, ...
-    %         'Tag', 'ScheduleList' ...
-    %     );
-    %     for i = 1:length(block)
-    %         scheduleRow(grid, block, i);
-    %     end
-    % end
+    function grid = scheduleList(parent, block)
+        grid = uigridlayout(parent, [length(block), 4], ...
+            'Padding', [0, 0, 0, 0], ...
+            'ColumnWidth', {'fit', 'fit', 'fit', 'fit'}, ...
+            'RowHeight', {'fit'}, ...
+            'Tag', 'ScheduleList' ...
+        );
+        for i = 1:length(block)
+            scheduleRow(grid, block, i);
+        end
+    end
 
-    % function grid = scheduleControl(parent, cfg)
-    %     grid = uigridlayout(parent, [3, 2], ...
-    %         'Padding', [0, 0, 0, 0], ...
-    %         'RowHeight', {'fit', 'fit', 'fit'}, ...
-    %         'ColumnWidth', {'fit', '1x'}, ...
-    %         'Tag', 'Schedule' ...
-    %     );
-    %     grid.UserData.Block = cfg.Block;
-    %     ginsert(grid, 1, [1 2], @uilabel, 'Text', summarizeBlock(grid.UserData.Block),  'Tag', 'BlockSummary');
-    %     ginsert(grid, 2, [1 2], @scheduleList, grid.UserData.Block);
-    %     ginsert(grid, 3, 1, @uibutton, 'Text', 'Add Trial Type', 'ButtonPushedFcn', @addRow);
-    % end
+    function grid = scheduleControl(parent, cfg)
+        grid = uigridlayout(parent, [3, 2], ...
+            'Padding', [0, 0, 0, 0], ...
+            'RowHeight', {'fit', 'fit', 'fit'}, ...
+            'ColumnWidth', {'fit', '1x'}, ...
+            'Tag', 'Schedule' ...
+        );
+        grid.UserData.Block = cfg.Block;
+        ginsert(grid, 1, [1 2], @uilabel, 'Text', summarizeBlock(grid.UserData.Block),  'Tag', 'BlockSummary');
+        ginsert(grid, 2, [1 2], @scheduleList, grid.UserData.Block);
+        ginsert(grid, 3, 1, @uibutton, 'Text', 'Add Target Location', 'ButtonPushedFcn', @addRow);
+    end
 
     function onDone(src, ~)
         all_values = main_cg.Value;
 
         fig = src.Parent.Parent;
-        % Settings = struct('Angle', Settings.Angle); % No UI for these yet
-        Settings.Position.Target = [all_values.Position.Targetx,all_values.Position.Targety];
+        Settings = struct('Block', Settings.Block); % No UI for these yet
+        % Settings.Position.Target = [all_values.Position.Targetx,all_values.Position.Targety];
         % Settings.Position.Right = [all_values.Position.Rightx,all_values.Position.Righty];
         Settings.Position.Center = [all_values.Position.Centerx,all_values.Position.Centery];
         % Settings.Position.Flipped = all_values.Position.Flipped;
@@ -496,7 +507,7 @@ function MainUI = settings_ui(Settings)
         end
         Settings.Timing.RewardDuration = all_values.Reward.Duration;
 
-        % Settings.Block = findobj(fig, 'Tag', 'Schedule').UserData.Block;
+        % Settings.Blok = findobj(fig, 'Tag', 'Schedule').UserData.Block;
 
         fig.UserData.Result = Settings;
         uiresume(fig);

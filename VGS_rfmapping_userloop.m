@@ -24,7 +24,7 @@ if isempty(RunTime)
     show_settings(TrialRecord);
 
     rng('shuffle');
-    % TrialRecord.User.BlockNumber = 0;
+    TrialRecord.User.BlockNumber = 0;
     % TrialRecord.User.Stats = SessionStats();
     RunTime = get_function_handle(embed_timingfile(MLConfig,timingfile,userdefined_trialholder));
     return;
@@ -33,26 +33,26 @@ end
 % gen_str = sprintf('gen(darkly_gen, %g, %g)', TrialRecord.User.Settings.Position.Center(1), TrialRecord.User.Settings.Position.Center(2));
 % stim = {gen_str};
 
-% if isfield(TrialRecord.User, 'state') && TrialRecord.User.remove_trial
-%     TrialRecord.User.state = remove_trial(TrialRecord.User.state, TrialRecord.User.trial);
-% end
+if isfield(TrialRecord.User, 'state') && TrialRecord.User.remove_trial
+    TrialRecord.User.state = remove_trial(TrialRecord.User.state, TrialRecord.User.trial);
+end
 
-% if ~isfield(TrialRecord.User, 'state') || (TrialRecord.User.state.Remaining <= 0)
-%     TrialRecord.User.state = create_schedule(TrialRecord.User.Settings.Block);
-%     if TrialRecord.User.state.Remaining <= 0
-%         error('Blocks must have at least one trial');
-%     end
+if ~isfield(TrialRecord.User, 'state') || (TrialRecord.User.state.Remaining <= 0)
+    TrialRecord.User.state = create_schedule(TrialRecord.User.Settings.Block);
+    if TrialRecord.User.state.Remaining <= 0
+        error('Blocks must have at least one trial');
+    end
 
-%     next_scheduled_block(TrialRecord);
-% end
+    next_scheduled_block(TrialRecord);
+end
 
-% if TrialRecord.User.RepeatStimulusOnTrial
-%     C = mltaskobject(stim,MLConfig,TrialRecord);
-%     timingfile = RunTime;
-%     return;
-% end
+if TrialRecord.User.RepeatStimulusOnTrial
+    % C = mltaskobject(stim,MLConfig,TrialRecord);
+    timingfile = RunTime;
+    return;
+end
 
-% TrialRecord.User.trial = get_trial(TrialRecord.User.state);
+TrialRecord.User.trial = get_trial(TrialRecord.User.state);
 
 % gp_settings = TrialRecord.User.Settings.GP;
 

@@ -1,7 +1,6 @@
 %
 % Draws a random trial from the remaining set containing:
-%   Left
-%   Coherence
+%   TGPosition
 %   ScheduleIndex (i.e. which of the original cell array did it belong to?)
 %   UserData (Optional)
 % Note that this doesn't remove it from the schedule;
@@ -37,12 +36,12 @@ function next_trial = get_trial(schedule_state)
 
     % Construct the instance of the selected trial type and populate it
     next_trial = struct();
-    next_trial.Coherence = trial_type.Coherence;
+    next_trial.TGPosition = trial_type.TGPosition;
     next_trial.ScheduleIndex = selected_index;
     if isfield(trial_type, 'UserData')
         next_trial.UserData = trial_type.UserData;
     end
 
     % Select left/right with probability proportional to the remaining trials of each alignment
-    next_trial.Left = (randi(trial_type.Remaining) <= trial_type.RemainingLeft);
+    % next_trial.Left = (randi(trial_type.Remaining) <= trial_type.RemainingLeft);
 end

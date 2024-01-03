@@ -16,7 +16,18 @@ function params = default_params()
         'RewardDuration', fuzzed_uniform(100, 100), ...
         'InvalidTimeout', 0 ...
         );
-    % params.Block = {struct('LeftBias', 0.5, 'Coherence', 1.0, 'TrialCount', 100)};
+    
+    params.Block = {};
+    angles = [0,pi/4,pi/2,pi*3/4,pi,pi*5/4,pi*3/2,pi*7/4];
+    eccens = [2,5,10,15];
+    for angle_idx = 1:length(angles)
+        for eccen_idx = 1:length(eccens)
+            x = eccens(eccen_idx)*sin(angles(angle_idx));
+            y = eccens(eccen_idx)*cos(angles(angle_idx));
+            params.Block = [params.Block,struct('x', round(x,2), 'y', round(y,2), 'TrialCount', 10)];
+        end
+    end
+
     params.Position = struct('Target', [-3 3], 'Center', [0 0]);
     % params.Angle = struct('Left', '135deg', 'Right', '45deg');
 end
