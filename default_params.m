@@ -19,7 +19,7 @@ function params = default_params()
     
     params.Block = {};
     angles = [0,pi/4,pi/2,pi*3/4,pi,pi*5/4,pi*3/2,pi*7/4];
-    eccens = [2,5,10,15];
+    eccens = [2,4,8,12];
     for angle_idx = 1:length(angles)
         for eccen_idx = 1:length(eccens)
             x = eccens(eccen_idx)*sin(angles(angle_idx));

@@ -39,9 +39,9 @@ trial_type = TrialRecord.User.trial;
 % end
 % recent_trlnum = 20;
 
-bhv_variable('TG Position', trial_type.TGPosition);
+bhv_variable('TGPosition', trial_type.TGPosition);
 
-dashboard(2, sprintf('TG (%g%,%g%)', trial_type.TGPosition(1), trial_type.TGPosition(2)));
+dashboard(2, sprintf('TG (%g,%g)', trial_type.TGPosition(1), trial_type.TGPosition(2)));
 
 % stats = TrialRecord.User.Stats;
 % dashboard(3, sprintf('Left Accuracy: %g%% Right Accuracy: %g%% Total Accuracy: %g%%', 100 * stats.ByDirection.Left.Accuracy, 100 * stats.ByDirection.Right.Accuracy, 100 * stats.All.Accuracy));

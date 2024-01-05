@@ -16,18 +16,6 @@ function MainUI = settings_ui(Settings)
         rmfield(Settings, 'RepeatStimulusIncorrect');
     end
 
-    if ~isfield(Settings, 'Block')
-        Settings.Block = {};
-        angles = [0,pi/4,pi/2,pi*3/4,pi,pi*5/4,pi*3/2,pi*7/4];
-        eccens = [2,5,10,15];
-        for angle_idx = 1:length(angles)
-            for eccen_idx = 1:length(eccens)
-                x = eccens(eccen_idx)*sin(angles(angle_idx));
-                y = eccens(eccen_idx)*cos(angles(angle_idx));
-                Settings.Block = [Settings.Block,struct('x', round(x,2), 'y', round(y,2), 'TrialCount', 10)];
-            end
-        end
-    end
     % Timingfields = fieldnames(Settings.Timing);
     % for fieldNum = 1:length(Timingfields)
     %     if isstruct(Settings.Timing.(Timingfields{fieldNum})) & isfield(Settings.Timing.(Timingfields{fieldNum}), 'Gaussian')
@@ -186,11 +174,9 @@ function MainUI = settings_ui(Settings)
 
         cg.addControl('', 1, [1 6], @header, title);
         cg.addToRow(2, 1, ...
-            % 'Target x', {'Targetx', @uieditfield, 'numeric', 'Value', cfg.Target(1), 'Limits', [-inf inf],'ValueDisplayFormat', '%g°'}, ...
             'Center x', {'Centerx', @uieditfield, 'numeric', 'Value', cfg.Center(1), 'Limits', [-inf inf], 'ValueDisplayFormat', '%g°'});
         cg.addToRow(3, 1, ...
-            % 'Target y', {'Targety', @uieditfield, 'numeric', 'Value', cfg.Target(2), 'Limits', [-inf inf],'ValueDisplayFormat', '%g°'}, ...
-             'Center y', {'Centery', @uieditfield, 'numeric', 'Value', cfg.Center(2), 'Limits', [-inf inf], 'ValueDisplayFormat', '%g°'});
+          'Center y', {'Centery', @uieditfield, 'numeric', 'Value', cfg.Center(2), 'Limits', [-inf inf], 'ValueDisplayFormat', '%g°'});
         % cg.addLabel('Flipped', 4, 1);
         % cg.Grid.RowHeight{4} = 0;
     end
@@ -478,10 +464,12 @@ function MainUI = settings_ui(Settings)
         all_values = main_cg.Value;
 
         fig = src.Parent.Parent;
-        Settings = struct('Block', Settings.Block); % No UI for these yet
+        Block = Settings.Block;
+        Settings = struct('Position',struct('Center',[all_values.Position.Centerx,all_values.Position.Centery]))
+        Settings.Block = Block; % No UI for these yet
         % Settings.Position.Target = [all_values.Position.Targetx,all_values.Position.Targety];
         % Settings.Position.Right = [all_values.Position.Rightx,all_values.Position.Righty];
-        Settings.Position.Center = [all_values.Position.Centerx,all_values.Position.Centery];
+        % Settings.Position = struct('Center',[all_values.Position.Centerx,all_values.Position.Centery]);
         % Settings.Position.Flipped = all_values.Position.Flipped;
         Settings.FP = all_values.FP;
         Settings.TG = all_values.TG;
