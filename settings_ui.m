@@ -16,6 +16,18 @@ function MainUI = settings_ui(Settings)
         rmfield(Settings, 'RepeatStimulusIncorrect');
     end
 
+    if ~isfield(Settings, 'BlockOverride')
+        Settings.BlockOverride = 0;
+    end
+
+    if ~isfield(Settings,'DefaultBlock')
+        Settings.DefaultBlock = Settings.Block;
+    end
+
+    if ~isfield(Settings,'NewBlock')
+        Settings.NewBlock = {struct('x',3,'y',3,'TrialCount',10)};
+    end
+
     % Timingfields = fieldnames(Settings.Timing);
     % for fieldNum = 1:length(Timingfields)
     %     if isstruct(Settings.Timing.(Timingfields{fieldNum})) & isfield(Settings.Timing.(Timingfields{fieldNum}), 'Gaussian')
@@ -57,7 +69,9 @@ function MainUI = settings_ui(Settings)
         {'', @taskTimeControls, Settings}, ...
         {'Reward', @rewardControl, 'Rewards', Settings.Reward}, ...
         {'', @header, 'Repeat Stimulus'}, ...
-        {'RepeatStimulus', @uidropdown, 'Items', {'Never', 'Invalid Trials'}, 'Tag', 'RepeatStimulus'});
+        {'RepeatStimulus', @uidropdown, 'Items', {'Never', 'Invalid Trials'}, 'Tag', 'RepeatStimulus'},...
+        {'', @header, 'Block Design'}, ...
+        {'', @scheduleControl,Settings});
 
     grid = main_cg.Grid;
     grid.Padding = [10, 10, 10, 10];
@@ -169,14 +183,15 @@ function MainUI = settings_ui(Settings)
     % end
 
     function cg = positionControl(parent, title, cfg)
-        cg = ControlGroup.fittedGrid(parent, [3 7]);
+        cg = ControlGroup.fittedGrid(parent, [2 7]);
         cg.Grid.ColumnWidth{7} = '1x';
 
         cg.addControl('', 1, [1 6], @header, title);
         cg.addToRow(2, 1, ...
-            'Center x', {'Centerx', @uieditfield, 'numeric', 'Value', cfg.Center(1), 'Limits', [-inf inf], 'ValueDisplayFormat', '%g°'});
-        cg.addToRow(3, 1, ...
-          'Center y', {'Centery', @uieditfield, 'numeric', 'Value', cfg.Center(2), 'Limits', [-inf inf], 'ValueDisplayFormat', '%g°'});
+            'Center x', {'Centerx', @uieditfield, 'numeric', 'Value', cfg.Center(1), 'Limits', [-inf inf], 'ValueDisplayFormat', '%g°'},...
+            'Center y', {'Centery', @uieditfield, 'numeric', 'Value', cfg.Center(2), 'Limits', [-inf inf], 'ValueDisplayFormat', '%g°'});
+        % cg.addToRow(3, 1, ...
+        %   'Center y', {'Centery', @uieditfield, 'numeric', 'Value', cfg.Center(2), 'Limits', [-inf inf], 'ValueDisplayFormat', '%g°'});
         % cg.addLabel('Flipped', 4, 1);
         % cg.Grid.RowHeight{4} = 0;
     end
@@ -448,25 +463,36 @@ function MainUI = settings_ui(Settings)
     end
 
     function grid = scheduleControl(parent, cfg)
-        grid = uigridlayout(parent, [3, 2], ...
+        grid = uigridlayout(parent, [4, 2], ...
             'Padding', [0, 0, 0, 0], ...
             'RowHeight', {'fit', 'fit', 'fit'}, ...
             'ColumnWidth', {'fit', '1x'}, ...
             'Tag', 'Schedule' ...
         );
-        grid.UserData.Block = cfg.Block;
-        ginsert(grid, 1, [1 2], @uilabel, 'Text', summarizeBlock(grid.UserData.Block),  'Tag', 'BlockSummary');
-        ginsert(grid, 2, [1 2], @scheduleList, grid.UserData.Block);
-        ginsert(grid, 3, 1, @uibutton, 'Text', 'Add Target Location', 'ButtonPushedFcn', @addRow);
+        grid.UserData.NewBlock = cfg.NewBlock;
+        ginsert(grid, 1, 1, @uilabel, 'Text', 'Block Override');
+        override = ginsert(grid, 1, 2, @uicheckbox, 'Text', '', 'Value', cfg.BlockOverride);
+        grid.UserData.override = override;
+        ginsert(grid, 2, [1 2], @uilabel, 'Text', summarizeBlock(grid.UserData.NewBlock),  'Tag', 'BlockSummary');
+        ginsert(grid, 3, [1 2], @scheduleList, grid.UserData.NewBlock);
+        ginsert(grid, 4, 1, @uibutton, 'Text', 'Add Target Location', 'ButtonPushedFcn', @addRow);
     end
 
     function onDone(src, ~)
         all_values = main_cg.Value;
 
         fig = src.Parent.Parent;
-        Block = Settings.Block;
-        Settings = struct('Position',struct('Center',[all_values.Position.Centerx,all_values.Position.Centery]))
-        Settings.Block = Block; % No UI for these yet
+        DefaultBlock = Settings.DefaultBlock;
+
+        Settings = struct('Position',struct('Center',[all_values.Position.Centerx,all_values.Position.Centery]));
+        Settings.DefaultBlock = DefaultBlock;
+        Settings.NewBlock = findobj(fig, 'Tag', 'Schedule').UserData.NewBlock;
+        Settings.BlockOverride = findobj(fig, 'Tag', 'Schedule').UserData.override;
+        if Settings.BlockOverride
+            Settings.Block = Settings.NewBlock; 
+        else
+            Settings.Block = Settings.DefaultBlock;
+        end
         % Settings.Position.Target = [all_values.Position.Targetx,all_values.Position.Targety];
         % Settings.Position.Right = [all_values.Position.Rightx,all_values.Position.Righty];
         % Settings.Position = struct('Center',[all_values.Position.Centerx,all_values.Position.Centery]);
