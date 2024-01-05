@@ -25,7 +25,7 @@ function MainUI = settings_ui(Settings)
     end
 
     if ~isfield(Settings,'NewBlock')
-        Settings.NewBlock = {struct('x',3,'y',3,'TrialCount',10)};
+        Settings.NewBlock = {struct('x', 3,'y', 3,'TrialCount', 10)};
     end
 
     % Timingfields = fieldnames(Settings.Timing);
@@ -444,8 +444,8 @@ function MainUI = settings_ui(Settings)
 
     function scheduleRow(grid, block, i)
         grid.RowHeight{i} = 'fit';
-        ginsert(grid, i, 1, @numberControl, 'x', block{i}.x, 'Limits', [-inf,inf], 'UserData', struct('TrialIndex', i), 'ValueChangedFcn', @onXChange, 'ValueDisplayFormat', '%g%%');
-        ginsert(grid, i, 2, @numberControl, 'y', block{i}.y, 'Limits', [-inf,inf], 'UserData', struct('TrialIndex', i), 'ValueChangedFcn', @onYChange, 'ValueDisplayFormat', '%g%%');
+        ginsert(grid, i, 1, @numberControl, 'x', block{i}.x, 'Limits', [-inf,inf], 'UserData', struct('TrialIndex', i), 'ValueChangedFcn', @onXChange, 'ValueDisplayFormat', '%g');
+        ginsert(grid, i, 2, @numberControl, 'y', block{i}.y, 'Limits', [-inf,inf], 'UserData', struct('TrialIndex', i), 'ValueChangedFcn', @onYChange, 'ValueDisplayFormat', '%g');
         ginsert(grid, i, 3, @numberControl, 'Trial Count', block{i}.TrialCount, 'UserData', struct('TrialIndex', i), 'ValueChangedFcn', @onTrialCountChange);
         ginsert(grid, i, 4, @uibutton, 'Text', 'Remove', 'UserData', i, 'ButtonPushedFcn', @removeRow);
     end
@@ -469,12 +469,12 @@ function MainUI = settings_ui(Settings)
             'ColumnWidth', {'fit', '1x'}, ...
             'Tag', 'Schedule' ...
         );
-        grid.UserData.NewBlock = cfg.NewBlock;
+        grid.UserData.Block = cfg.NewBlock;
         ginsert(grid, 1, 1, @uilabel, 'Text', 'Block Override');
         override = ginsert(grid, 1, 2, @uicheckbox, 'Text', '', 'Value', cfg.BlockOverride);
-        grid.UserData.override = override;
-        ginsert(grid, 2, [1 2], @uilabel, 'Text', summarizeBlock(grid.UserData.NewBlock),  'Tag', 'BlockSummary');
-        ginsert(grid, 3, [1 2], @scheduleList, grid.UserData.NewBlock);
+        grid.UserData.override = override.Value;
+        ginsert(grid, 2, [1 2], @uilabel, 'Text', summarizeBlock(grid.UserData.Block),  'Tag', 'BlockSummary');
+        ginsert(grid, 3, [1 2], @scheduleList, grid.UserData.Block);
         ginsert(grid, 4, 1, @uibutton, 'Text', 'Add Target Location', 'ButtonPushedFcn', @addRow);
     end
 
@@ -486,8 +486,9 @@ function MainUI = settings_ui(Settings)
 
         Settings = struct('Position',struct('Center',[all_values.Position.Centerx,all_values.Position.Centery]));
         Settings.DefaultBlock = DefaultBlock;
-        Settings.NewBlock = findobj(fig, 'Tag', 'Schedule').UserData.NewBlock;
-        Settings.BlockOverride = findobj(fig, 'Tag', 'Schedule').UserData.override;
+        % keyboard
+        Settings.NewBlock = findobj(fig, 'Tag', 'Schedule').UserData.Block;
+        Settings.BlockOverride = 1;%findobj(fig, 'Tag', 'Schedule').UserData.override;
         if Settings.BlockOverride
             Settings.Block = Settings.NewBlock; 
         else
