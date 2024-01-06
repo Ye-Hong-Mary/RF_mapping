@@ -136,10 +136,10 @@ wh_saccade_start = WaitThenHold(saccade_start);
 wh_saccade_start.WaitTime = times.ResponseWindow;
 wh_saccade_start.HoldTime = 0;
 
-% saccade_end = NotAdapter(tg_tgt);
-wh_saccade_end = WaitThenHold(tg_tgt);
-wh_saccade_end.WaitTime = times.MaximumSaccade;
-wh_saccade_end.HoldTime = 0;
+saccade_end = NotAdapter(tg_tgt);
+wh_saccade_end = WaitThenHold(saccade_end);
+wh_saccade_end.WaitTime = 0;
+wh_saccade_end.HoldTime = times.MaximumSaccade;
 
 wh_saccade = Sequential(wh_saccade_start);
 wh_saccade.add(wh_saccade_end);
@@ -350,7 +350,7 @@ end
         response_window_start = run_scene(scene4, 106);
         
         if wh_saccade_start.Success 
-            if wh_saccade_end.Success
+            if ~wh_saccade_end.Success
             % rt = wh4_tg.AcquiredTime - response_window_start;
                 if scene7_enabled
                     wh7.WaitTime = fuzz(Settings.Timing.TGHoldToReward);%, trialtime - response_window_start, Settings.Timing.ResponseWindow);
