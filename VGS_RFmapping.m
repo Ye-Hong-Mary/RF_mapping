@@ -351,7 +351,7 @@ end
         
         if wh_saccade_start.Success 
             if ~wh_saccade_end.Success
-            % rt = wh4_tg.AcquiredTime - response_window_start;
+                rt = wh_saccade_start.AcquiredTime - response_window_start;
                 if scene7_enabled
                     wh7.WaitTime = fuzz(Settings.Timing.TGHoldToReward);%, trialtime - response_window_start, Settings.Timing.ResponseWindow);
                 else

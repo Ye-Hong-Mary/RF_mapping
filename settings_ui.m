@@ -43,7 +43,7 @@ function MainUI = settings_ui(Settings)
     % end
 
     % For convenience, some things will be grouped / scaled differently in the UI than in the Settings struct
-    Settings.Reward.Duration = Settings.Timing.RewardDuration
+    Settings.Reward.Duration = Settings.Timing.RewardDuration;
     Settings.Timing = rmfield(Settings.Timing, 'RewardDuration');
     Settings.Reward.Probability = Settings.RewardProbability;
     Settings = rmfield(Settings, 'RewardProbability');
@@ -462,6 +462,11 @@ function MainUI = settings_ui(Settings)
         end
     end
 
+    function overrideChange(src, ~)
+        parent = src.Parent;
+        parent.UserData.override = src.Value;
+    end
+
     function grid = scheduleControl(parent, cfg)
         grid = uigridlayout(parent, [4, 2], ...
             'Padding', [0, 0, 0, 0], ...
@@ -470,9 +475,9 @@ function MainUI = settings_ui(Settings)
             'Tag', 'Schedule' ...
         );
         grid.UserData.Block = cfg.NewBlock;
-        ginsert(grid, 1, 1, @uilabel, 'Text', 'Block Override');
-        override = ginsert(grid, 1, 2, @uicheckbox, 'Text', '', 'Value', cfg.BlockOverride);
-        grid.UserData.override = override.Value;
+        grid.UserData.override = cfg.BlockOverride;
+        ginsert(grid, 1, 1, @uicheckbox, 'Text', 'Override defalut block', 'Value', cfg.BlockOverride, 'ValueChangedFcn', @overrideChange);
+        % keyboard
         ginsert(grid, 2, [1 2], @uilabel, 'Text', summarizeBlock(grid.UserData.Block),  'Tag', 'BlockSummary');
         ginsert(grid, 3, [1 2], @scheduleList, grid.UserData.Block);
         ginsert(grid, 4, 1, @uibutton, 'Text', 'Add Target Location', 'ButtonPushedFcn', @addRow);
@@ -488,7 +493,7 @@ function MainUI = settings_ui(Settings)
         Settings.DefaultBlock = DefaultBlock;
         % keyboard
         Settings.NewBlock = findobj(fig, 'Tag', 'Schedule').UserData.Block;
-        Settings.BlockOverride = 1;%findobj(fig, 'Tag', 'Schedule').UserData.override;
+        Settings.BlockOverride = findobj(fig, 'Tag', 'Schedule').UserData.override;
         if Settings.BlockOverride
             Settings.Block = Settings.NewBlock; 
         else
