@@ -13,12 +13,12 @@ userdefined_trialholder = '';
 
 persistent RunTime;
 if isempty(RunTime)
-    if isfile('vgs_settings.mat')
-        TrialRecord.User.Settings = matfile('vgs_settings.mat').Settings;
+    if isfile('protocol_settings.mat')
+        TrialRecord.User.Settings = matfile('protocol_settings.mat').Settings;
     else
         TrialRecord.User.Settings = default_params();
         Settings = TrialRecord.User.Settings;
-        save('vgs_settings.mat', 'Settings');
+        save('protocol_settings.mat', 'Settings');
     end
 
     show_settings(TrialRecord);
