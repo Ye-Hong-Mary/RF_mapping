@@ -1,17 +1,19 @@
 if ~exist('eye_','var'), error('This demo requires eye signal input. Please set it up or try the simulation mode.'); end
 if ~exist('mouse_','var'), error('This demo requires the mouse input. Please enable it in the main menu or try the simulation mode.'); end
+mouse_.showcursor(false);  % hide the mouse cursor from the subject screen
 
 hotkey('x', 'escape_screen(); assignin(''caller'',''continue_'',false);');
 
-dashboard(1,'Fixate on center point',[0 1 0]);
+dashboard(1,'Move: Left click + Drag, Scale: [DOWN(-) UP(+)]',[0 1 0]);
+
 dashboard(2,'Press ''x'' to quit');
 
-nstim = 10;  % we will draw 10 stimuli
-sz = ones(nstim,2) + 4 * repmat(rand(nstim,1),1,2);  % 1-5 degrees
-color = [163 73 164; 63 72 204; 0 162 232; 34 177 76; 255 242 0; 255 127 39; 237 28 36];  % 7 preset colors
-c = color(ceil(7*rand(nstim,1)),:);  % 10-by-3 matrix
-scrsize = Screen.SubjectScreenFullSize / Screen.PixelsPerDegree;  % screen size in degrees
-position = repmat(2.5,nstim,2) + repmat(scrsize-5,nstim,1).*rand(nstim,2) - repmat(scrsize/2,nstim,1);  % [0 0] is the screen center
+% nstim = 10;  % we will draw 10 stimuli
+% sz = ones(nstim,2) + 4 * repmat(rand(nstim,1),1,2);  % 1-5 degrees
+% color = [163 73 164; 63 72 204; 0 162 232; 34 177 76; 255 242 0; 255 127 39; 237 28 36];  % 7 preset colors
+% c = color(ceil(7*rand(nstim,1)),:);  % 10-by-3 matrix
+% scrsize = Screen.SubjectScreenFullSize / Screen.PixelsPerDegree;  % screen size in degrees
+% position = repmat(2.5,nstim,2) + repmat(scrsize-5,nstim,1).*rand(nstim,2) - repmat(scrsize/2,nstim,1);  % [0 0] is the screen center
 
 % editable
 fp_size = 0.2;
@@ -38,8 +40,8 @@ fp_tgt = SingleTarget(eye_);
 fp_tgt.Target = fp_graphic;
 fp_tgt.Threshold = fp_threshold;
 
-img = ImageGraphic(null_);
-img.List = {'test.png',[position(2,:)],[],sz(2,:)*100,360 * rand};
+img = Image_RF_Mapper(mouse_);
+img.List = {'test.png',[4 4],[],[200 200],0};
 
 set_iti(iti_time);
 blank_tc = TimeCounter(null_);
