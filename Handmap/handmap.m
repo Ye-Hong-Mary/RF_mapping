@@ -8,13 +8,6 @@ dashboard(1,'Move: Left click + Drag, Scale: [DOWN(-) UP(+)]',[0 1 0]);
 
 dashboard(2,'Press ''x'' to quit');
 
-% nstim = 10;  % we will draw 10 stimuli
-% sz = ones(nstim,2) + 4 * repmat(rand(nstim,1),1,2);  % 1-5 degrees
-% color = [163 73 164; 63 72 204; 0 162 232; 34 177 76; 255 242 0; 255 127 39; 237 28 36];  % 7 preset colors
-% c = color(ceil(7*rand(nstim,1)),:);  % 10-by-3 matrix
-% scrsize = Screen.SubjectScreenFullSize / Screen.PixelsPerDegree;  % screen size in degrees
-% position = repmat(2.5,nstim,2) + repmat(scrsize-5,nstim,1).*rand(nstim,2) - repmat(scrsize/2,nstim,1);  % [0 0] is the screen center
-
 % editable
 fp_size = 0.2;
 fp_color = [1,1,1];
@@ -27,7 +20,15 @@ invalid_timeout = 1000;
 editable('fp_size','fp_threshold','fp_acq','fp_hold','iti_time','invalid_timeout');
 editable('-color', 'fp_color');
 
-
+if isfield(TrialRecord.User,'imgPos') && isfield(TrialRecord.User,'imgScale') && isfield(TrialRecord.User,'imgAngle')
+    imgPos = TrialRecord.User.imgPos;
+    imgScale = TrialRecord.User.imgScale ;
+    imgAngle = TrialRecord.User.imgAngle;
+else
+    imgPos = [4,4];
+    imgScale = [1,1];
+    imgAngle = 0;
+end
 %% create scene
 
 fp_graphic = CircleGraphic(null_);
@@ -41,7 +42,8 @@ fp_tgt.Target = fp_graphic;
 fp_tgt.Threshold = fp_threshold;
 
 img = Image_RF_Mapper(mouse_);
-img.List = {'test.png',[4 4],[],[200 200],0};
+img.List = {'test.png',imgPos,[],[200,200],imgAngle};
+img.Scale = imgScale;
 
 set_iti(iti_time);
 blank_tc = TimeCounter(null_);
@@ -80,6 +82,9 @@ if continue_trial
     run_scene(scene1, 1);
     if ~wh1.Success
         dashboard(3, 'Failure to acquire focus');
+        TrialRecord.User.imgPos = img.Position;
+        TrialRecord.User.imgScale = img.Scale;
+        TrialRecord.User.imgAngle = img.Angle;
         TrialRecord.User.trialerror = 1;
         TrialRecord.User.final_eventcode = 3;
         TrialRecord.User.timeout_duration = invalid_timeout;
@@ -92,11 +97,17 @@ if continue_trial
     run_scene(scene2, 2);
     if ~wh2.Success
         dashboard(3, 'Failure to maintain focus');
+        TrialRecord.User.imgPos = img.Position;
+        TrialRecord.User.imgScale = img.Scale;
+        TrialRecord.User.imgAngle = img.Angle;
         TrialRecord.User.trialerror = 2;
         TrialRecord.User.final_eventcode = 3;
         TrialRecord.User.timeout_duration = invalid_timeout;
     else
         dashboard(3, 'Success');
+        TrialRecord.User.imgPos = img.Position;
+        TrialRecord.User.imgScale = img.Scale;
+        TrialRecord.User.imgAngle = img.Angle;
         TrialRecord.User.trialerror = 0;
         TrialRecord.User.final_eventcode = 4;
         TrialRecord.User.timeout_duration = 0;
