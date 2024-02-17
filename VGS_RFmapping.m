@@ -148,6 +148,7 @@ wh_saccade.add(wh_saccade_end);
 
 bhv_code(1, 'Acquire FP', 2, 'FP hold', 3, 'TG on to FP off', 4, 'Invalid trial', 6, 'Correct response'); % Shared between task types
 bhv_code(106, 'Response window', 107, 'TG hold to reward');                      % Delay task events
+bhv_code(100, 'Blank screen'); % the end of a task
 % bhv_code(204, 'Response prohibited', 205, 'Response window, GP on', 206, 'Response window, GP off', 207, 'TG hold to reward');    % Reaction task events
 
 %% Scene 1: Starting the trial and acquiring focus
@@ -462,7 +463,7 @@ end
 
 blank_tc.Duration = max(blank_tc.Duration, TrialRecord.User.timeout_duration);
 run_scene(blank, TrialRecord.User.final_eventcode);
-idle(ceil(1000.0 / MLConfig.Screen.RefreshRate)); % One frame
+idle(ceil(1000.0 / MLConfig.Screen.RefreshRate),[],100); % One frame
 trialerror(TrialRecord.User.trialerror); % The argument's value will be zero on success
 
 if show_config_ui
