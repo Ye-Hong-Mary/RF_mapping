@@ -3,7 +3,6 @@
 %
 % Mary Ye Hong
 % 
-%
 
 function [C,timingfile,userdefined_trialholder] = VGS_rfmapping_userloop(MLConfig,TrialRecord)
 
@@ -29,7 +28,6 @@ if isempty(RunTime)
     RunTime = get_function_handle(embed_timingfile(MLConfig,timingfile,userdefined_trialholder));
     return;
 end
-
 
 
 if isfield(TrialRecord.User, 'state') && TrialRecord.User.remove_trial
