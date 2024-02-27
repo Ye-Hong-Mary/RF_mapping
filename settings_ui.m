@@ -1,17 +1,6 @@
 function MainUI = settings_ui(Settings)
     % If importing settings from an earlier version, these variables may not be initialized yet.
 
-    
-    % if ~isfield(Settings.Timing, 'IncorrectTimeout')
-    %     Settings.Timing.IncorrectTimeout = 0;
-    % end
-    % if ~isfield(Settings.Timing, 'InvalidTimeout')
-    %     Settings.Timing.InvalidTimeout = 0;
-    % end
-
-    % if ~isfield(Settings.Timing, 'MaximumSaccade')
-    %     Settings.Timing.MaximumSaccade = 1000;
-    % end
     if isfield(Settings, 'RepeatStimulusIncorrect')
         rmfield(Settings, 'RepeatStimulusIncorrect');
     end
@@ -28,31 +17,13 @@ function MainUI = settings_ui(Settings)
         Settings.NewBlock = {struct('x', 3,'y', 3,'TrialCount', 10)};
     end
 
-    % Timingfields = fieldnames(Settings.Timing);
-    % for fieldNum = 1:length(Timingfields)
-    %     if isstruct(Settings.Timing.(Timingfields{fieldNum})) & isfield(Settings.Timing.(Timingfields{fieldNum}), 'Gaussian')
-    %         Settings.Timing.(Timingfields{fieldNum}).Exponential = Settings.Timing.(Timingfields{fieldNum}).Gaussian;  
-    %         if Settings.Timing.(Timingfields{fieldNum}).Gaussian & isfield(Settings.Timing.(Timingfields{fieldNum}), 'Stdev') & isfield(Settings.Timing.(Timingfields{fieldNum}), 'Cutoff')
-    %             Settings.Timing.(Timingfields{fieldNum}) = rmfield(Settings.Timing.(Timingfields{fieldNum}), 'Stdev');
-    %             Settings.Timing.(Timingfields{fieldNum}) = rmfield(Settings.Timing.(Timingfields{fieldNum}), 'Cutoff');
-    %             Settings.Timing.(Timingfields{fieldNum}).Minscale = 0.8;
-    %             Settings.Timing.(Timingfields{fieldNum}).Maxscale = 2;
-    %         end
-    %         Settings.Timing.(Timingfields{fieldNum}) = rmfield(Settings.Timing.(Timingfields{fieldNum}), 'Gaussian');
-    %     end
-    % end
 
     % For convenience, some things will be grouped / scaled differently in the UI than in the Settings struct
     Settings.Reward.Duration = Settings.Timing.RewardDuration;
     Settings.Timing = rmfield(Settings.Timing, 'RewardDuration');
     Settings.Reward.Probability = Settings.RewardProbability;
     Settings = rmfield(Settings, 'RewardProbability');
-    % if isfield(Settings.Timing, 'TimeoutInvalid')
-    %     Settings = rmfield(Settings, 'TimeoutInvalid');
-    % end
-    % if isfield(Settings.Timing, 'TimeoutIncorrect')
-    %     Settings = rmfield(Settings, 'TimeoutIncorrect');
-    % end
+
 
     MainUI = uifigure('Name', 'Protocol settings', 'Visible', false, 'WindowStyle', 'alwaysontop');
     MainUI.Position = [MainUI.Position(1) - 100, MainUI.Position(2) - 100, MainUI.Position(3) + 200, MainUI.Position(4) + 200]; % Just a little bigger than the defaults
@@ -77,29 +48,9 @@ function MainUI = settings_ui(Settings)
     grid.Padding = [10, 10, 10, 10];
     grid.Scrollable = true;
 
-    % timeout_dd = main_cg.Controls.TimeoutType;
-    % if Settings.TimeoutIncorrect
-    %     if Settings.TimeoutInvalid
-    %         timeout_dd.Value = 'All Errors';
-    %     else
-    %         timeout_dd.Value = 'Incorrect Responses';
-    %     end
-    % else
-    %     if Settings.TimeoutInvalid
-    %         timeout_dd.Value = 'Invalid Trials';
-    %     else
-    %         timeout_dd.Value = 'Never';
-    %     end
-    % end
 
     repeat_dd = main_cg.Controls.RepeatStimulus;
-    % if Settings.RepeatStimulusIncorrect
-    %     if Settings.RepeatStimulusInvalid
-    %         repeat_dd.Value = 'All Errors';
-    %     else
-    %         repeat_dd.Value = 'Incorrect Responses';
-    %     end
-    % else
+
         if Settings.RepeatStimulusInvalid
             repeat_dd.Value = 'Invalid Trials';
         else
@@ -155,32 +106,7 @@ function MainUI = settings_ui(Settings)
             'Color', {'Color', @colorButton, cfg.Color}, ...
             'Radius', {'Size', @uieditfield, 'numeric', 'Value', cfg.Size, 'Limits', [0 inf], 'ValueDisplayFormat', '%g°'}, ...
             'Threshold', {'Threshold', @uieditfield, 'numeric', 'Value', cfg.Threshold, 'Limits', [0 inf], 'ValueDisplayFormat', '%g°'});
-        % cg.addLabel('Enabled', 3, 1);
-        % if isfield(cfg, 'Enabled')
-        %     cg.addControl('Enabled', 3, 2, @uicheckbox, 'Text', '', 'Value', cfg.Enabled);
-        % else
-        %     cg.Grid.RowHeight{3} = 0; % A sneaky way of ensuring the controls are aligned even when no enablement is there
-        % end
     end
-
-    % function cg = glassPatternControl(parent, title, cfg)
-    %     cg = ControlGroup.fittedGrid(parent, [4 7]);
-    %     cg.Grid.ColumnWidth{7} = '1x';
-
-    %     cg.addControl('', 1, [1 6], @header, title);
-    %     cg.addToRow(2, 1, ...
-    %         'Color', {'Color', @colorButton, cfg.Color}, ...
-    %         'Dot Size', {'DotSize', @uieditfield, 'numeric', 'Value', cfg.DotSize, 'Limits', [0 inf], 'ValueDisplayFormat', '%d px', 'RoundFractionalValues', 'on'}, ...
-    %         'Pair Spacing', {'Spacing', @uieditfield, 'numeric', 'Value', cfg.Spacing, 'Limits', [0 inf], 'ValueDisplayFormat', '%d px', 'RoundFractionalValues', 'on'});
-    %     cg.addToRow(3, 3, ...
-    %         'Diameter', {'Diameter', @uieditfield, 'numeric', 'Value', cfg.Diameter, 'Limits', [1 inf], 'ValueDisplayFormat', '%d px', 'RoundFractionalValues', 'on'}, ...
-    %         'Number of Dots', {'DotCount', @uieditfield, 'numeric', 'Value', cfg.DotCount, 'Limits', [0 inf], 'RoundFractionalValues', 'on'});
-
-    %     % This is a little hack to ensure the columns line up with the
-    %     % visual target control's controls
-    %     cg.addLabel('Enabled', 4, 1);
-    %     cg.Grid.RowHeight{4} = 0;
-    % end
 
     function cg = positionControl(parent, title, cfg)
         cg = ControlGroup.fittedGrid(parent, [2 7]);
@@ -190,10 +116,6 @@ function MainUI = settings_ui(Settings)
         cg.addToRow(2, 1, ...
             'Center x', {'Centerx', @uieditfield, 'numeric', 'Value', cfg.Center(1), 'Limits', [-inf inf], 'ValueDisplayFormat', '%g°'},...
             'Center y', {'Centery', @uieditfield, 'numeric', 'Value', cfg.Center(2), 'Limits', [-inf inf], 'ValueDisplayFormat', '%g°'});
-        % cg.addToRow(3, 1, ...
-        %   'Center y', {'Centery', @uieditfield, 'numeric', 'Value', cfg.Center(2), 'Limits', [-inf inf], 'ValueDisplayFormat', '%g°'});
-        % cg.addLabel('Flipped', 4, 1);
-        % cg.Grid.RowHeight{4} = 0;
     end
 
     function cg = rewardControl(parent, title, cfg)
@@ -204,14 +126,6 @@ function MainUI = settings_ui(Settings)
         cg.addToRow(3, [1 3], {'Duration', @timeControl, 'Duration', 'RewardDuration', cfg.Duration, true});
     end
 
-    % function editCurve(src)
-    %     grid = src.Parent;
-    %     parent = grid.Parent;
-    %     response_window = findobj(MainUI, 'Tag', 'ResponseWindow').UserData.Time;
-    %     parent.UserData.Time = show_reactioncurve_settings(parent.UserData.CurveName, response_window, parent.UserData.Time);
-    %     ginsert(grid, 1, 1, @numberControl, 'Min', parent.UserData.Time.Min, 'ValueDisplayFormat', '%d ms', 'ValueChangedFcn', @(src, ~) setTimeField(src, 'Min'));
-    %     ginsert(grid, 1, 2, @numberControl, 'Max', parent.UserData.Time.Max, 'ValueDisplayFormat', '%d ms', 'ValueChangedFcn', @(src, ~) setTimeField(src, 'Max'));
-    % end
 
     function setTimeStruct(ctl)
         parent = ctl.Parent.Parent;
@@ -246,15 +160,6 @@ function MainUI = settings_ui(Settings)
         ginsert(grid, 1, 3, @numberControl, 'Maxscale', cfg.Maxscale,'Limits', [1 inf], 'ValueDisplayFormat', '%g', 'ValueChangedFcn', @(src, ~) setTimeField(src, 'Maxscale'));
     end
 
-    % function grid = reactionCurveControl(parent)
-    %     grid = uigridlayout(parent, [1, 3]);
-    %     grid.ColumnWidth = {'fit', 'fit'};
-    %     grid.Padding = [0, 0, 0, 0];
-    %     cfg = parent.UserData.Time;
-    %     ginsert(grid, 1, 1, @numberControl, 'Min', cfg.Min, 'ValueDisplayFormat', '%d ms', 'ValueChangedFcn', @(src, ~) setTimeField(src, 'Min'));
-    %     ginsert(grid, 1, 2, @numberControl, 'Max', cfg.Max, 'ValueDisplayFormat', '%d ms', 'ValueChangedFcn', @(src, ~) setTimeField(src, 'Max'));
-    %     ginsert(grid, 1, 3, @uibutton, 'Text', 'Edit Curve', 'ButtonPushedFcn', @(src, ~) editCurve(src));
-    % end
 
     function switchTimeControl(ctl, ~)
         parent = ctl.Parent;
@@ -270,8 +175,6 @@ function MainUI = settings_ui(Settings)
                 cfg = (old_time.Min + old_time.Max) / 2;
             elseif strcmp(old_fuzz, 'Exponential')
                 cfg = old_time.Mean;
-            % else % Curve
-            %     cfg = fuzz(old_time, 0.5, 1.0);
             end
             parent.UserData.Time = cfg;
             ginsert(parent, 1, 3, @fixedTimeControl);
@@ -280,28 +183,14 @@ function MainUI = settings_ui(Settings)
                 cfg = fuzzed_exponential((old_time.Min + old_time.Max) / 2, 2*old_time.Min/(old_time.Min + old_time.Max),2*old_time.Max/(old_time.Min + old_time.Max));
             elseif strcmp(old_fuzz, 'Fixed')%I think this is typo here
                 cfg = fuzzed_exponential(old_time, 1, 1);
-            % else % Curve
-            %     cfg = fuzzed_exponential((old_time.Min + old_time.Max) / 2, 2*old_time.Min/(old_time.Min + old_time.Max),2*old_time.Max/(old_time.Min + old_time.Max));
             end
             parent.UserData.Time = cfg;
             ginsert(parent, 1, 3, @exponentialTimeControl);
-        % elseif strcmp(ctl.Value, 'Reaction-Dependent')
-        %     if strcmp(old_fuzz, 'Range')
-        %         cfg = fuzzed_curve(old_time.Min, old_time.Max);
-        %     elseif strcmp(old_fuzz, 'Exponential')
-        %         cfg = fuzzed_curve(old_time.Mean *old_time.Minscale, old_time.Mean*old_time.Maxscale);
-        %     else % Fixed
-        %         cfg = fuzzed_curve(max(0, old_time - 1), old_time + 1);
-        %     end
-        %     parent.UserData.Time = cfg;
-        %     ginsert(parent, 1, 3, @reactionCurveControl);
         else % Range
             if strcmp(old_fuzz, 'Exponential')
                 cfg = fuzzed_uniform(old_time.Mean *old_time.Minscale, old_time.Mean*old_time.Maxscale);
             elseif strcmp(old_fuzz, 'Fixed')
                 cfg = fuzzed_uniform(old_time, old_time);
-            % else % Curve
-            %     cfg = fuzzed_uniform(old_time.Min, old_time.Max);
             end
             parent.UserData.Time = cfg;
             ginsert(parent, 1, 3, @uniformTimeControl);
@@ -317,7 +206,6 @@ function MainUI = settings_ui(Settings)
             'ColumnWidth', {'fit', 'fit', 'fit'}, ...
             'Tag', tag ...
         );
-        % grid.UserData.CurveName = title;
         grid.UserData.Time = cfg;
         grid.UserData.ControlGroupSetValueFcn = @(src, value) setfield(src.UserData, 'Time', value);
         grid.UserData.ControlGroupValueFcn = @(src) src.UserData.Time;
@@ -331,19 +219,12 @@ function MainUI = settings_ui(Settings)
             items = [items, 'Range', 'Exponential'];
         end
 
-        % if exist('enable_curve', 'var') && enable_curve
-        %     items = [items, 'Reaction-Dependent'];
-        % end
-
         ginsert(grid, 1, 1, @uilabel, 'Text', title);
         dd = ginsert(grid, 1, 2, @uidropdown, 'Items', items, 'ValueChangedFcn', @switchTimeControl);
 
         if ~isstruct(cfg)
             dd.Value = 'Fixed';
             ginsert(grid, 1, 3, @fixedTimeControl);
-        % elseif isfield(cfg, 'Curve') && cfg.Curve
-        %     dd.Value = 'Reaction-Dependent';
-        %     ginsert(grid, 1, 3, @reactionCurveControl);
         elseif isfield(cfg, 'Exponential') && cfg.Exponential
             dd.Value = 'Exponential';
             ginsert(grid, 1, 3, @exponentialTimeControl);
@@ -354,19 +235,6 @@ function MainUI = settings_ui(Settings)
         grid.UserData.FuzzType = dd.Value;
     end
 
-    % function onTaskType(src, ~)
-    %     parent = src.Parent;
-    %     parent.UserData.TaskIsDelay = strcmp(src.Value, 'Delay');
-    %     if parent.UserData.TaskIsDelay
-    %         parent.RowHeight{6} = 'fit';
-    %         parent.RowHeight{7} = 0;
-    %         parent.RowHeight{9} = 0;
-    %     else
-    %         parent.RowHeight{6} = 0;
-    %         parent.RowHeight{7} = 'fit';
-    %         parent.RowHeight{9} = 'fit';
-    %     end
-    % end
 
     function grid = taskTimeControls(parent, cfg)
         grid = buildColumn(parent, ...      
@@ -379,16 +247,8 @@ function MainUI = settings_ui(Settings)
             @timeControl, {'Invalid Timeout', 'InvalidTimeout', cfg.Timing.InvalidTimeout, true}, ...
             @timeControl, {'Inter-Trial Time', 'InterTrialInterval', cfg.Timing.InterTrialInterval, true} ...
         );
-        % grid.UserData.TaskIsDelay = cfg.TaskIsDelay;
         grid.Tag = 'Timing';
 
-        % dd = findobj(grid, 'Tag', 'TaskType');
-        % if cfg.TaskIsDelay
-        %     dd.Value = 'Delay';
-        % else
-        %     dd.Value = 'Reaction';
-        % end
-        % onTaskType(dd);
     end
 
     function s = summarizeBlock(Block)
@@ -477,7 +337,6 @@ function MainUI = settings_ui(Settings)
         grid.UserData.Block = cfg.NewBlock;
         grid.UserData.override = cfg.BlockOverride;
         ginsert(grid, 1, 1, @uicheckbox, 'Text', 'Override defalut block', 'Value', cfg.BlockOverride, 'ValueChangedFcn', @overrideChange);
-        % keyboard
         ginsert(grid, 2, [1 2], @uilabel, 'Text', summarizeBlock(grid.UserData.Block),  'Tag', 'BlockSummary');
         ginsert(grid, 3, [1 2], @scheduleList, grid.UserData.Block);
         ginsert(grid, 4, 1, @uibutton, 'Text', 'Add Target Location', 'ButtonPushedFcn', @addRow);
@@ -491,7 +350,6 @@ function MainUI = settings_ui(Settings)
 
         Settings = struct('Position',struct('Center',[all_values.Position.Centerx,all_values.Position.Centery]));
         Settings.DefaultBlock = DefaultBlock;
-        % keyboard
         Settings.NewBlock = findobj(fig, 'Tag', 'Schedule').UserData.Block;
         Settings.BlockOverride = findobj(fig, 'Tag', 'Schedule').UserData.override;
         if Settings.BlockOverride
@@ -499,35 +357,17 @@ function MainUI = settings_ui(Settings)
         else
             Settings.Block = Settings.DefaultBlock;
         end
-        % Settings.Position.Target = [all_values.Position.Targetx,all_values.Position.Targety];
-        % Settings.Position.Right = [all_values.Position.Rightx,all_values.Position.Righty];
-        % Settings.Position = struct('Center',[all_values.Position.Centerx,all_values.Position.Centery]);
-        % Settings.Position.Flipped = all_values.Position.Flipped;
         Settings.FP = all_values.FP;
         Settings.TG = all_values.TG;
-        % Settings.DIS = all_values.DIS;
-        % Settings.GP = all_values.GP;
-
-        % timeout = findobj(fig, 'Tag', 'TimeoutType');
-        % Settings.TimeoutInvalid = (strcmp(timeout.Value, 'Invalid Trials') || strcmp(timeout.Value, 'All Errors'));
-        % Settings.TimeoutIncorrect = (strcmp(timeout.Value, 'Incorrect Responses') || strcmp(timeout.Value, 'All Errors'));
         repeat_stim = findobj(fig, 'Tag', 'RepeatStimulus');
         Settings.RepeatStimulusInvalid = strcmp(repeat_stim.Value, 'Invalid Trials') ;
-        % Settings.RepeatStimulusIncorrect = (strcmp(repeat_stim.Value, 'Incorrect Responses') || strcmp(repeat_stim.Value, 'All Errors'));
-
+       
         Settings.RewardProbability = all_values.Reward.Probability;
-
-        % timing = findobj(fig, 'Tag', 'Timing');
-        % tasktype_dd = findobj(timing, 'Tag', 'TaskType');
-        % Settings.TaskIsDelay = strcmp(tasktype_dd.Value, 'Delay');
-
         times = {'AcquireFP', 'FPHold', 'TGOnToFPOff', 'ResponseWindow', 'MaximumSaccade', 'TGHoldToReward', 'InterTrialInterval', 'InvalidTimeout'};
         for i = 1:length(times)
             Settings.Timing.(times{i}) = findobj(fig, 'Tag', times{i}).UserData.Time;
         end
         Settings.Timing.RewardDuration = all_values.Reward.Duration;
-
-        % Settings.Blok = findobj(fig, 'Tag', 'Schedule').UserData.Block;
 
         fig.UserData.Result = Settings;
         uiresume(fig);

@@ -42,6 +42,4 @@ function next_trial = get_trial(schedule_state)
         next_trial.UserData = trial_type.UserData;
     end
 
-    % Select left/right with probability proportional to the remaining trials of each alignment
-    % next_trial.Left = (randi(trial_type.Remaining) <= trial_type.RemainingLeft);
 end
