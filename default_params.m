@@ -19,12 +19,12 @@ function params = default_params()
     
     params.DefaultBlock = {};
     angles = [0,pi/4,pi/2,pi*3/4,pi,pi*5/4,pi*3/2,pi*7/4];
-    eccens = [2.5,4,6,10];
+    eccens = [3.5,5,7,10];
     for angle_idx = 1:length(angles)
         for eccen_idx = 1:length(eccens)
             x = eccens(eccen_idx)*sin(angles(angle_idx));
             y = eccens(eccen_idx)*cos(angles(angle_idx));
-            params.DefaultBlock = [params.Block,struct('x', round(x,2), 'y', round(y,2), 'TrialCount', 10)];
+            params.DefaultBlock = [params.DefaultBlock,struct('x', round(x,2), 'y', round(y,2), 'TrialCount', 10)];
         end
     end
     params.BlockOverride = 0;
