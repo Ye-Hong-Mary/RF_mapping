@@ -4,9 +4,9 @@ mouse_.showcursor(false);  % hide the mouse cursor from the subject screen
 
 hotkey('x', 'escape_screen(); assignin(''caller'',''continue_'',false);');
 
-dashboard(1,'Move: Left click + Drag, Scale: [DOWN(-) UP(+)]',[0 1 0]);
+dashboard(2,'Move: Left click + Drag, Scale: [DOWN(-) UP(+)]',[0 1 0]);
 
-dashboard(2,'Press ''x'' to quit');
+dashboard(3,'Press ''x'' to quit');
 
 % editable
 fp_size = 0.2;
@@ -42,8 +42,9 @@ fp_tgt.Target = fp_graphic;
 fp_tgt.Threshold = fp_threshold;
 
 img = Image_RF_Mapper(mouse_);
-img.List = {'test.png',imgPos,[],[200,200],imgAngle};
+img.List = {'white.png',imgPos,[],[200,200],imgAngle};
 img.Scale = imgScale;
+img.InfoDisplay = true;
 
 set_iti(iti_time);
 blank_tc = TimeCounter(null_);
@@ -78,10 +79,10 @@ scene2 = create_scene(ad2);
 continue_trial = true;   
 
 if continue_trial
-    dashboard(3, 'Acquiring FP');
+    dashboard(4, 'Acquiring FP');
     run_scene(scene1, 1);
     if ~wh1.Success
-        dashboard(3, 'Failure to acquire focus');
+        dashboard(4, 'Failure to acquire focus');
         TrialRecord.User.imgPos = img.Position;
         TrialRecord.User.imgScale = img.Scale;
         TrialRecord.User.imgAngle = img.Angle;
@@ -96,7 +97,7 @@ if continue_trial
     dashboard(3, 'FP hold');
     run_scene(scene2, 2);
     if ~wh2.Success
-        dashboard(3, 'Failure to maintain focus');
+        dashboard(4, 'Failure to maintain focus');
         TrialRecord.User.imgPos = img.Position;
         TrialRecord.User.imgScale = img.Scale;
         TrialRecord.User.imgAngle = img.Angle;
@@ -104,7 +105,7 @@ if continue_trial
         TrialRecord.User.final_eventcode = 3;
         TrialRecord.User.timeout_duration = invalid_timeout;
     else
-        dashboard(3, 'Success');
+        dashboard(4, 'Success');
         TrialRecord.User.imgPos = img.Position;
         TrialRecord.User.imgScale = img.Scale;
         TrialRecord.User.imgAngle = img.Angle;

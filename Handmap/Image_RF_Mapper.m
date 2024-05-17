@@ -1,6 +1,7 @@
 classdef Image_RF_Mapper < ImageGraphic
     properties
        ScaleStep = 0.1
+       InfoDisplay = false
     end
     properties (Access = protected)
         LB_Hold
@@ -81,13 +82,13 @@ classdef Image_RF_Mapper < ImageGraphic
             obj.KB_Hold = [up down];
           
         end
-        % function draw(obj,p)
-        %     draw@SineGrating(obj,p);
-        %     if obj.InfoDisplay
-        %         % display some information on the control screen
-        %         p.dashboard(1,sprintf('Position = [%.1f %.1f], Radius = %.1f, Direction = %.1f',obj.Position,obj.Radius,obj.Direction));
-        %         p.dashboard(2,sprintf('SpatialFrequency = %.1f, TemporalFrequency = %.1f',obj.SpatialFrequency,obj.TemporalFrequency));
-        %     end
-        % end
+        function draw(obj,p)
+            draw@ImageGraphic(obj,p);
+            if obj.InfoDisplay
+                % display some information on the control screen
+                p.dashboard(1,sprintf('Position = [%.1f %.1f]',obj.Position));
+                % p.dashboard(2,sprintf('SpatialFrequency = %.1f, TemporalFrequency = %.1f',obj.SpatialFrequency,obj.TemporalFrequency));
+            end
+        end
     end
 end
