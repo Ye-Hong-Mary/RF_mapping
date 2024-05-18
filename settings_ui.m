@@ -336,6 +336,7 @@ function MainUI = settings_ui(Settings)
         );
         grid.UserData.Block = cfg.NewBlock;
         grid.UserData.override = cfg.BlockOverride;
+        % @uidropdown, {'Items', {'Delay', 'Reaction'}, 'Tag', 'TaskType', 'ValueChangedFcn', @onTaskType}, ...
         ginsert(grid, 1, 1, @uicheckbox, 'Text', 'Override defalut block', 'Value', cfg.BlockOverride, 'ValueChangedFcn', @overrideChange);
         ginsert(grid, 2, [1 2], @uilabel, 'Text', summarizeBlock(grid.UserData.Block),  'Tag', 'BlockSummary');
         ginsert(grid, 3, [1 2], @scheduleList, grid.UserData.Block);
@@ -368,6 +369,8 @@ function MainUI = settings_ui(Settings)
             Settings.Timing.(times{i}) = findobj(fig, 'Tag', times{i}).UserData.Time;
         end
         Settings.Timing.RewardDuration = all_values.Reward.Duration;
+
+        Settings.handmap = 1; % always true for now
 
         fig.UserData.Result = Settings;
         uiresume(fig);

@@ -50,7 +50,7 @@ classdef Circle_RF_Mapper < CircleGraphic
             draw@CircleGraphic(obj,p);
             if obj.InfoDisplay
                 % display some information on the control screen
-                p.dashboard(1,sprintf('Position = [%.1f %.1f]',obj.Position));
+                p.dashboard(1,sprintf('TG Position = [%.1f %.1f]',obj.Position));
 
             end
         end

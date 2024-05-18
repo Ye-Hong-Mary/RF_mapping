@@ -5,6 +5,8 @@
 %
 
 if ~exist('eye_','var'), error('This demo requires eye signal input. Please set it up or try the simulation mode.'); end
+if ~exist('mouse_','var'), error('This demo requires the mouse input. Please enable it in the main menu or try the simulation mode.'); end
+mouse_.showcursor(false);  % hide the mouse cursor from the subject screen
 
 % Hotkey X: The Monkey Logic menu
 hotkey('x', 'idle(0); escape_screen(); assignin(''caller'',''continue_'',false);');
@@ -29,12 +31,19 @@ end
 set_iti(times.InterTrialInterval);
 
 %% Record Trial parameters for later analysis
+if Settings.handmap
+    if isfield(TrialRecord.User,'tgPos') 
+        tgPos = TrialRecord.User.tgPos;
+    else
+        tgPos = [4,4];
+    end
+else
+    trial_type = TrialRecord.User.trial;
 
-trial_type = TrialRecord.User.trial;
+    bhv_variable('TGPosition', trial_type.TGPosition);
 
-bhv_variable('TGPosition', trial_type.TGPosition);
-
-dashboard(2, sprintf('TG (%g,%g)', trial_type.TGPosition(1), trial_type.TGPosition(2)));
+    dashboard(1, sprintf('TG Position = [%.1f %.1f]',trial_type.TGPosition));%TG (%g,%g)', trial_type.TGPosition(1), trial_type.TGPosition(2)));
+end
 
 % stats = TrialRecord.User.Stats;
 % dashboard(3, sprintf('Left Accuracy: %g%% Right Accuracy: %g%% Total Accuracy: %g%%', 100 * stats.ByDirection.Left.Accuracy, 100 * stats.ByDirection.Right.Accuracy, 100 * stats.All.Accuracy));
@@ -52,11 +61,17 @@ fp_graphic.FaceColor = Settings.FP.Color;
 fp_graphic.EdgeColor = fp_graphic.FaceColor;
 fp_graphic.Position = Settings.Position.Center;
 
-tg_graphic = CircleGraphic(null_);
+if Settings.handmap
+    tg_graphic = Circle_RF_Mapper(mouse_);
+    tg_graphic.Position = tgPos;
+    tg_graphic.InfoDisplay = true;
+else
+    tg_graphic = CircleGraphic(null_);
+    tg_graphic.Position = trial_type.TGPosition;
+end
 tg_graphic.Size = Settings.TG.Size * 2.0;
 tg_graphic.FaceColor = Settings.TG.Color;
 tg_graphic.EdgeColor = tg_graphic.FaceColor;
-tg_graphic.Position = trial_type.TGPosition;
 
 
 %% Eye tracker targets
@@ -123,12 +138,11 @@ ad3.add(tg_graphic);
 scene3 = create_scene(ad3);
 
 %% Scene 4: Focus has been maintained long enough, so focus point off; make a saccade
+ad4 = AllContinue(tg_tgt);
 
-    ad4 = AllContinue(tg_tgt);
+ad4.add(wh_saccade);
 
-    ad4.add(wh_saccade);
-
-    scene4 = create_scene(ad4);
+scene4 = create_scene(ad4);
 
 
 %% Scene 7: Until the time has elapsed, must not touch outside the region of the target
@@ -158,7 +172,7 @@ response_window_start = 0;             % Used when estimating reaction time in o
 TrialRecord.User.timeout_duration = 0; % This value will be applied when determining the length of the blank scene
 
 if continue_trial
-    dashboard(1, 'Acquiring FP');
+    dashboard(2, 'Acquiring FP');
     run_scene(scene1, 1);
     if ~wh1.Success
         onInvalidTrial(TrialRecord, 'Failure to acquire focus', 4, 4);
@@ -167,7 +181,7 @@ if continue_trial
 end
 
 if continue_trial
-    dashboard(1, 'FP hold');
+    dashboard(2, 'FP hold');
     run_scene(scene2, 2);
     if ~wh2.Success
         onInvalidTrial(TrialRecord, 'Failure to maintain focus', 3, 4);
@@ -176,7 +190,7 @@ if continue_trial
 end
 
 if continue_trial
-    dashboard(1, 'TG on to FP off');
+    dashboard(2, 'TG on to FP off');
     run_scene(scene3, 3);
     if ~wh3.Success
         onInvalidTrial(TrialRecord, 'Failure to maintain focus when targets appear', 5, 4);
@@ -186,9 +200,10 @@ end
 
 
     if continue_trial
-        dashboard(1, 'Response window');
+        dashboard(2, 'Response window');
+        tg_tgt.Target = tg_graphic;
         response_window_start = run_scene(scene4, 106);
-        
+        % keyboard
         if wh_saccade_start.Success 
             if ~wh_saccade_end.Success
                 rt = wh_saccade_start.AcquiredTime - response_window_start;
@@ -209,7 +224,8 @@ end
     end
 
     if continue_trial
-        dashboard(1, 'TG Hold to Reward');
+        dashboard(2, 'TG Hold to Reward');
+        % tg_tgt.Target = tg_graphic;
         run_scene(scene7, 107);
         if ~wh7.Success
             onCorrectTrial(TrialRecord, 'Success', 6);
@@ -224,6 +240,10 @@ blank_tc.Duration = max(blank_tc.Duration, TrialRecord.User.timeout_duration);
 run_scene(blank, TrialRecord.User.final_eventcode);
 idle(ceil(1000.0 / MLConfig.Screen.RefreshRate),[],100); % One frame
 trialerror(TrialRecord.User.trialerror); % The argument's value will be zero on success
+if Settings.handmap
+    TrialRecord.User.tgPos = tg_graphic.Position;
+    bhv_variable('TGPosition', tg_graphic.Position);
+end
 
 if show_config_ui
     show_settings(TrialRecord, true); %#ok<UNRCH>
@@ -231,8 +251,8 @@ end
 
 %% Routines for handling each of the trial outcomes
 
-function onInvalidTrial(TrialRecord, msg, errorcode, eventcode)
-    dashboard(1, msg);
+function onInvalidTrial(TrialRecord, msg, errorcode, eventcode,Settings, tg_graphic)
+    dashboard(2, msg);
     
     TrialRecord.User.timeout_duration = fuzz(TrialRecord.User.Settings.Timing.InvalidTimeout);
 
@@ -247,8 +267,9 @@ function onInvalidTrial(TrialRecord, msg, errorcode, eventcode)
 end
 
 
-function onCorrectTrial(TrialRecord, msg, eventcode)
-    dashboard(1, msg);
+function onCorrectTrial(TrialRecord, msg, eventcode,Settings, tg_graphic)
+    dashboard(2, msg);
+
     if times.RewardOnSuccess
         goodmonkey(times.RewardDuration, 'NonBlocking', 2);
     end
