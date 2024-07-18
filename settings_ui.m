@@ -1,65 +1,71 @@
 function MainUI = settings_ui(Settings)
-    % If importing settings from an earlier version, these variables may not be initialized yet.
+% If importing settings from an earlier version, these variables may not be initialized yet.
 
-    if isfield(Settings, 'RepeatStimulusIncorrect')
-        rmfield(Settings, 'RepeatStimulusIncorrect');
-    end
+if isfield(Settings, 'RepeatStimulusIncorrect')
+    rmfield(Settings, 'RepeatStimulusIncorrect');
+end
 
-    if ~isfield(Settings, 'BlockOverride')
-        Settings.BlockOverride = 0;
-    end
+if ~isfield(Settings, 'BlockOverride')
+    Settings.BlockOverride = 0;
+end
 
-    if ~isfield(Settings,'DefaultBlock')
-        Settings.DefaultBlock = Settings.Block;
-    end
+if ~isfield(Settings,'NewBlock')
+    Settings.NewBlock = {struct('x', 3,'y', 3,'TrialCount', 10)};
+end
+if ~isfield(Settings,'handmap')
+    Settings.handmap = 1;
+end
 
-    if ~isfield(Settings,'NewBlock')
-        Settings.NewBlock = {struct('x', 3,'y', 3,'TrialCount', 10)};
-    end
-
-
-    % For convenience, some things will be grouped / scaled differently in the UI than in the Settings struct
-    Settings.Reward.Duration = Settings.Timing.RewardDuration;
-    Settings.Timing = rmfield(Settings.Timing, 'RewardDuration');
-    Settings.Reward.Probability = Settings.RewardProbability;
-    Settings = rmfield(Settings, 'RewardProbability');
-
-
-    MainUI = uifigure('Name', 'Protocol settings', 'Visible', false, 'WindowStyle', 'alwaysontop');
-    MainUI.Position = [MainUI.Position(1) - 100, MainUI.Position(2) - 100, MainUI.Position(3) + 200, MainUI.Position(4) + 200]; % Just a little bigger than the defaults
-
-    main_container = uigridlayout(MainUI, [2, 1]);
-    main_container.ColumnWidth = {'1x'};
-    main_container.RowHeight = {'1x', 'fit'};
-
-    main_cg = ControlGroup.column(main_container, ...
-        {'FP', @visualTargetControl, 'Focus Point (FP)', Settings.FP}, ...
-        {'TG', @visualTargetControl, 'Target (TG)', Settings.TG}, ...
-        {'Position', @positionControl, 'Position', Settings.Position}, ...
-        {'', @header, 'Task Timing'}, ...
-        {'', @taskTimeControls, Settings}, ...
-        {'Reward', @rewardControl, 'Rewards', Settings.Reward}, ...
-        {'', @header, 'Repeat Stimulus'}, ...
-        {'RepeatStimulus', @uidropdown, 'Items', {'Never', 'Invalid Trials'}, 'Tag', 'RepeatStimulus'},...
-        {'', @header, 'Block Design'}, ...
-        {'', @scheduleControl,Settings});
-
-    grid = main_cg.Grid;
-    grid.Padding = [10, 10, 10, 10];
-    grid.Scrollable = true;
+if ~isfield(Settings,'angles')
+    Settings.angles = [0 45 90 135 180 215 270 315];
+end
+if ~isfield(Settings,'eccens')
+    Settings.eccens = [3.5 5 7 10];
+end
 
 
-    repeat_dd = main_cg.Controls.RepeatStimulus;
+% For convenience, some things will be grouped / scaled differently in the UI than in the Settings struct
+Settings.Reward.Duration = Settings.Timing.RewardDuration;
+Settings.Timing = rmfield(Settings.Timing, 'RewardDuration');
+Settings.Reward.Probability = Settings.RewardProbability;
+Settings = rmfield(Settings, 'RewardProbability');
 
-        if Settings.RepeatStimulusInvalid
-            repeat_dd.Value = 'Invalid Trials';
-        else
-            repeat_dd.Value = 'Never';
-        end
-    % end
 
-    uibutton(main_container, 'Text', 'Apply Settings', 'Tag', 'ApplySettings', 'ButtonPushedFcn', @onDone);
-    MainUI.Visible = true;
+MainUI = uifigure('Name', 'Protocol settings', 'Visible', false, 'WindowStyle', 'alwaysontop');
+MainUI.Position = [MainUI.Position(1) - 100, MainUI.Position(2) - 100, MainUI.Position(3) + 200, MainUI.Position(4) + 200]; % Just a little bigger than the defaults
+
+main_container = uigridlayout(MainUI, [2, 1]);
+main_container.ColumnWidth = {'1x'};
+main_container.RowHeight = {'1x', 'fit'};
+
+main_cg = ControlGroup.column(main_container, ...
+    {'FP', @visualTargetControl, 'Focus Point (FP)', Settings.FP}, ...
+    {'TG', @visualTargetControl, 'Target (TG)', Settings.TG}, ...
+    {'Position', @positionControl, 'Position', Settings.Position}, ...
+    {'', @header, 'Task Timing'}, ...
+    {'', @taskTimeControls, Settings}, ...
+    {'Reward', @rewardControl, 'Rewards', Settings.Reward}, ...
+    {'', @header, 'Repeat Stimulus'}, ...
+    {'RepeatStimulus', @uidropdown, 'Items', {'Never', 'Invalid Trials'}, 'Tag', 'RepeatStimulus'},...
+    {'', @header, 'Block Design'}, ...
+    {'', @scheduleControl,Settings});
+
+grid = main_cg.Grid;
+grid.Padding = [10, 10, 10, 10];
+grid.Scrollable = true;
+
+
+repeat_dd = main_cg.Controls.RepeatStimulus;
+
+if Settings.RepeatStimulusInvalid
+    repeat_dd.Value = 'Invalid Trials';
+else
+    repeat_dd.Value = 'Never';
+end
+% end
+
+uibutton(main_container, 'Text', 'Apply Settings', 'Tag', 'ApplySettings', 'ButtonPushedFcn', @onDone);
+MainUI.Visible = true;
 
     function grid = buildColumn(parent, varargin)
         if mod(numel(varargin), 2)
@@ -77,13 +83,13 @@ function MainUI = settings_ui(Settings)
         grid = cg.Grid;
     end
 
-    % Deprecated
+% Deprecated
     function grid = labeled(parent, label_text, cons, varargin)
         grid = uigridlayout(parent, [1, 2], ...
             'Padding', [0, 0, 0, 0], ...
             'RowHeight', {'fit'}, ...
             'ColumnWidth', {'fit', 'fit'} ...
-        );
+            );
         ginsert(grid, 1, 1, @uilabel, 'Text', label_text);
         ctl = ginsert(grid, 1, 2, cons, varargin{:});
         grid.UserData.Control = ctl;
@@ -205,7 +211,7 @@ function MainUI = settings_ui(Settings)
             'RowHeight', {'fit'}, ...
             'ColumnWidth', {'fit', 'fit', 'fit'}, ...
             'Tag', tag ...
-        );
+            );
         grid.UserData.Time = cfg;
         grid.UserData.ControlGroupSetValueFcn = @(src, value) setfield(src.UserData, 'Time', value);
         grid.UserData.ControlGroupValueFcn = @(src) src.UserData.Time;
@@ -237,7 +243,7 @@ function MainUI = settings_ui(Settings)
 
 
     function grid = taskTimeControls(parent, cfg)
-        grid = buildColumn(parent, ...      
+        grid = buildColumn(parent, ...
             @timeControl, {'Acquire FP', 'AcquireFP', cfg.Timing.AcquireFP}, ...
             @timeControl, {'FP Hold', 'FPHold', cfg.Timing.FPHold, true}, ...
             @timeControl, {'TG On to FP Off', 'TGOnToFPOff', cfg.Timing.TGOnToFPOff, true}, ...
@@ -246,26 +252,26 @@ function MainUI = settings_ui(Settings)
             @timeControl, {'TG Hold to Reward', 'TGHoldToReward', cfg.Timing.TGHoldToReward, true}, ...
             @timeControl, {'Invalid Timeout', 'InvalidTimeout', cfg.Timing.InvalidTimeout, true}, ...
             @timeControl, {'Inter-Trial Time', 'InterTrialInterval', cfg.Timing.InterTrialInterval, true} ...
-        );
+            );
         grid.Tag = 'Timing';
 
     end
 
-    function s = summarizeBlock(Block)
-        s = 0;
-        for i = 1:length(Block)
-            s = s + Block{i}.TrialCount;
-        end
-        s = sprintf('%d target locations with a total of %d trials per block', length(Block), s);
-    end
+% function s = summarizeBlock(Block)
+%     s = 0;
+%     for i = 1:length(Block)
+%         s = s + Block{i}.TrialCount;
+%     end
+%     s = sprintf('%d target locations with a total of %d trials per block', length(Block), s);
+% end
 
     function addRow(src, ~)
         parent = src.Parent;
         parent.UserData.Block{length(parent.UserData.Block) + 1} = struct('x', 3, 'y', 3, 'TrialCount', 10);
         lst = findobj(parent, 'Tag', 'ScheduleList');
         scheduleRow(lst, parent.UserData.Block, length(parent.UserData.Block));
-        summary = findobj(parent, 'Tag', 'BlockSummary');
-        summary.Text = summarizeBlock(parent.UserData.Block);
+        % summary = findobj(parent, 'Tag', 'BlockSummary');
+        % summary.Text = summarizeBlock(parent.UserData.Block);
     end
 
     function removeRow(src, ~)
@@ -275,11 +281,11 @@ function MainUI = settings_ui(Settings)
             return;
         end
         parent.UserData.Block(row) = [];
-        summary = findobj(parent, 'Tag', 'BlockSummary');
-        summary.Text = summarizeBlock(parent.UserData.Block);
+        % summary = findobj(parent, 'Tag', 'BlockSummary');
+        % summary.Text = summarizeBlock(parent.UserData.Block);
         old_list = findobj(parent, 'Tag', 'ScheduleList');
         delete(old_list);
-        ginsert(parent, 2, [1 2], @scheduleList, parent.UserData.Block);
+        ginsert(parent, 3, [1 2], @scheduleList, parent.UserData.Block);
     end
 
     function onXChange(src, ~)
@@ -298,8 +304,8 @@ function MainUI = settings_ui(Settings)
         trial_index = src.UserData.TrialIndex;
         parent = src.Parent.Parent.Parent;
         parent.UserData.Block{trial_index}.TrialCount = src.Value;
-        summary = findobj(parent, 'Tag', 'BlockSummary');
-        summary.Text = summarizeBlock(parent.UserData.Block);
+        % summary = findobj(parent, 'Tag', 'BlockSummary');
+        % summary.Text = summarizeBlock(parent.UserData.Block);
     end
 
     function scheduleRow(grid, block, i)
@@ -316,7 +322,7 @@ function MainUI = settings_ui(Settings)
             'ColumnWidth', {'fit', 'fit', 'fit', 'fit'}, ...
             'RowHeight', {'fit'}, ...
             'Tag', 'ScheduleList' ...
-        );
+            );
         for i = 1:length(block)
             scheduleRow(grid, block, i);
         end
@@ -325,36 +331,112 @@ function MainUI = settings_ui(Settings)
     function overrideChange(src, ~)
         parent = src.Parent;
         parent.UserData.override = src.Value;
+        if src.Value
+            parent.RowHeight{2} = 'fit';
+            parent.RowHeight{3} = 0;
+            parent.RowHeight{4} = 0;
+            parent.RowHeight{5} = 'fit';
+            parent.RowHeight{6} = 'fit';
+        else
+            parent.RowHeight{2} = 'fit';
+            parent.RowHeight{3} = 'fit';
+            parent.RowHeight{4} = 'fit';
+            parent.RowHeight{5} = 0;
+            parent.RowHeight{6} = 0;
+        end
+    end
+
+    function handmapChange(src, ~)
+        parent = src.Parent;
+        parent.UserData.handmap = src.Value;
+        if src.Value
+            parent.RowHeight{2} = 0;
+            parent.RowHeight{3} = 0;
+            parent.RowHeight{4} = 0;
+            parent.RowHeight{5} = 0;
+            parent.RowHeight{6} = 0;
+        else
+            parent.RowHeight{2} = 'fit';
+            if parent.UserData.override
+                parent.RowHeight{5} = 'fit';
+                parent.RowHeight{6} = 'fit';
+            else
+                parent.RowHeight{3} = 'fit';
+                parent.RowHeight{4} = 'fit';
+            end
+        end
+    end
+
+    function textChange(ctl, field_name)
+        parent = ctl.Parent;     
+        parent.UserData.(field_name) = str2num(ctl.Value);
     end
 
     function grid = scheduleControl(parent, cfg)
-        grid = uigridlayout(parent, [4, 2], ...
+        grid = uigridlayout(parent, [6, 2], ...
             'Padding', [0, 0, 0, 0], ...
-            'RowHeight', {'fit', 'fit', 'fit'}, ...
-            'ColumnWidth', {'fit', '1x'}, ...
+            'RowHeight', {'fit','fit', 'fit','fit', 'fit','fit'}, ...
+            'ColumnWidth', {'1x', '2x'}, ...
             'Tag', 'Schedule' ...
-        );
+            );
         grid.UserData.Block = cfg.NewBlock;
         grid.UserData.override = cfg.BlockOverride;
-        % @uidropdown, {'Items', {'Delay', 'Reaction'}, 'Tag', 'TaskType', 'ValueChangedFcn', @onTaskType}, ...
-        ginsert(grid, 1, 1, @uicheckbox, 'Text', 'Override defalut block', 'Value', cfg.BlockOverride, 'ValueChangedFcn', @overrideChange);
-        ginsert(grid, 2, [1 2], @uilabel, 'Text', summarizeBlock(grid.UserData.Block),  'Tag', 'BlockSummary');
-        ginsert(grid, 3, [1 2], @scheduleList, grid.UserData.Block);
-        ginsert(grid, 4, 1, @uibutton, 'Text', 'Add Target Location', 'ButtonPushedFcn', @addRow);
+        grid.UserData.handmap = cfg.handmap;
+        grid.UserData.angles = cfg.angles;
+        grid.UserData.eccens = cfg.eccens;
+        ginsert(grid, 1, 1, @uicheckbox, 'Text', 'Handmap Target?', 'Value', cfg.handmap, 'ValueChangedFcn', @handmapChange);
+        ginsert(grid, 2, 1, @uicheckbox, 'Text', 'Override default block', 'Value', cfg.BlockOverride, 'ValueChangedFcn', @overrideChange);
+        if cfg.handmap
+            grid.RowHeight{2} = 0;
+            grid.RowHeight{3} = 0;
+            grid.RowHeight{4} = 0;
+            grid.RowHeight{5} = 0;
+            grid.RowHeight{6} = 0;
+        else
+            grid.RowHeight{2} = 'fit';
+            if cfg.BlockOverride
+                grid.RowHeight{3} = 0;
+                grid.RowHeight{4} = 0;
+                grid.RowHeight{5} = 'fit';
+                grid.RowHeight{6} = 'fit';
+            else
+                grid.RowHeight{3} = 'fit';
+                grid.RowHeight{4} = 'fit';
+                grid.RowHeight{5} = 0;
+                grid.RowHeight{6} = 0;
+            end
+        end
+        ginsert(grid, 3, 1, @uilabel, 'Text','Default angles'); 
+        ginsert(grid, 3, 2, @uieditfield, 'text', 'Value', num2str(cfg.angles), 'ValueChangedFcn', @(src, ~) textChange(src, 'angles'));       
+        ginsert(grid, 4, 1, @uilabel, 'Text','Default eccens'); 
+        ginsert(grid, 4, 2, @uieditfield, 'text', 'Value', num2str(cfg.eccens), 'ValueChangedFcn', @(src, ~) textChange(src, 'eccens'));
+        ginsert(grid, 5, [1 2], @scheduleList, grid.UserData.Block);
+        ginsert(grid, 6, 1, @uibutton, 'Text', 'Add Target Location', 'ButtonPushedFcn', @addRow);
     end
 
     function onDone(src, ~)
         all_values = main_cg.Value;
 
         fig = src.Parent.Parent;
-        DefaultBlock = Settings.DefaultBlock;
 
         Settings = struct('Position',struct('Center',[all_values.Position.Centerx,all_values.Position.Centery]));
-        Settings.DefaultBlock = DefaultBlock;
+        Settings.handmap = findobj(fig, 'Tag', 'Schedule').UserData.handmap;
+
+        Settings.angles = findobj(fig, 'Tag', 'Schedule').UserData.angles;
+         xxxxxxxqqqSettings.eccens =  s;
+        Settings.DefaultBlock = {};
+        for angle_idx = 1:length(Settings.angles)
+            for eccen_idx = 1:length(Settings.eccens)
+                x = Settings.eccens(eccen_idx)*sin(Settings.angles(angle_idx)*pi/180);
+                y = Settings.eccens(eccen_idx)*cos(Settings.angles(angle_idx)*pi/180);
+                Settings.DefaultBlock = [Settings.DefaultBlock,struct('x', round(x,2), 'y', round(y,2), 'TrialCount', 10)];
+            end
+        end
+
         Settings.NewBlock = findobj(fig, 'Tag', 'Schedule').UserData.Block;
         Settings.BlockOverride = findobj(fig, 'Tag', 'Schedule').UserData.override;
         if Settings.BlockOverride
-            Settings.Block = Settings.NewBlock; 
+            Settings.Block = Settings.NewBlock;
         else
             Settings.Block = Settings.DefaultBlock;
         end
@@ -362,7 +444,7 @@ function MainUI = settings_ui(Settings)
         Settings.TG = all_values.TG;
         repeat_stim = findobj(fig, 'Tag', 'RepeatStimulus');
         Settings.RepeatStimulusInvalid = strcmp(repeat_stim.Value, 'Invalid Trials') ;
-       
+
         Settings.RewardProbability = all_values.Reward.Probability;
         times = {'AcquireFP', 'FPHold', 'TGOnToFPOff', 'ResponseWindow', 'MaximumSaccade', 'TGHoldToReward', 'InterTrialInterval', 'InvalidTimeout'};
         for i = 1:length(times)
@@ -370,7 +452,6 @@ function MainUI = settings_ui(Settings)
         end
         Settings.Timing.RewardDuration = all_values.Reward.Duration;
 
-        Settings.handmap = 1; % always true for now
 
         fig.UserData.Result = Settings;
         uiresume(fig);
