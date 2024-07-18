@@ -105,9 +105,13 @@ wh_saccade.add(wh_saccade_end);
 %% Behavior codes
 
 bhv_code(1, 'Acquire FP', 2, 'FP hold', 3, 'TG on to FP off', 4, 'Invalid trial', 6, 'Correct response'); % Shared between task types
-bhv_code(106, 'Response window', 107, 'TG hold to reward');                      % Delay task events
+bhv_code(36, 'Response window', 37, 'TG hold to reward');                      % Delay task events
+bhv_code(15, 'VGS Task');
 bhv_code(100, 'Blank screen'); % the end of a task
 % bhv_code(204, 'Response prohibited', 205, 'Response window, GP on', 206, 'Response window, GP off', 207, 'TG hold to reward');    % Reaction task events
+
+%% Scene 0: mark the task
+eventmarker(15);
 
 %% Scene 1: Starting the trial and acquiring focus
 
@@ -202,7 +206,7 @@ end
     if continue_trial
         dashboard(2, 'Response window');
         tg_tgt.Target = tg_graphic;
-        response_window_start = run_scene(scene4, 106);
+        response_window_start = run_scene(scene4, 36);
         % keyboard
         if wh_saccade_start.Success 
             if ~wh_saccade_end.Success
@@ -226,7 +230,7 @@ end
     if continue_trial
         dashboard(2, 'TG Hold to Reward');
         % tg_tgt.Target = tg_graphic;
-        run_scene(scene7, 107);
+        run_scene(scene7, 37);
         if ~wh7.Success
             onCorrectTrial(TrialRecord, 'Success', 6);
         else

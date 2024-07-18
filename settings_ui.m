@@ -423,7 +423,7 @@ MainUI.Visible = true;
         Settings.handmap = findobj(fig, 'Tag', 'Schedule').UserData.handmap;
 
         Settings.angles = findobj(fig, 'Tag', 'Schedule').UserData.angles;
-         xxxxxxxqqqSettings.eccens =  s;
+        Settings.eccens = findobj(fig, 'Tag', 'Schedule').UserData.eccens;
         Settings.DefaultBlock = {};
         for angle_idx = 1:length(Settings.angles)
             for eccen_idx = 1:length(Settings.eccens)
