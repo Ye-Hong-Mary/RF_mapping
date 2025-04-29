@@ -40,7 +40,7 @@ if Settings.handmap
 else
     trial_type = TrialRecord.User.trial;
 
-    bhv_variable('TGPosition', trial_type.TGPosition);
+    bhv_variable('TGPosition', trial_type.TGPosition - Settings.Position.Center);
 
     dashboard(1, sprintf('TG Position = [%.1f %.1f]',trial_type.TGPosition));%TG (%g,%g)', trial_type.TGPosition(1), trial_type.TGPosition(2)));
 end

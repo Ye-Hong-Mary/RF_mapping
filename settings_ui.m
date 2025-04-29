@@ -285,7 +285,7 @@ MainUI.Visible = true;
         % summary.Text = summarizeBlock(parent.UserData.Block);
         old_list = findobj(parent, 'Tag', 'ScheduleList');
         delete(old_list);
-        ginsert(parent, 3, [1 2], @scheduleList, parent.UserData.Block);
+        ginsert(parent, 5, [1 2], @scheduleList, parent.UserData.Block);
     end
 
     function onXChange(src, ~)

@@ -13,13 +13,14 @@ fp_size = 0.2;
 tg_size = 1;
 tg_color = [1,1,1];
 fp_color = [1,1,1];
-fp_position = [0,0]; % not editable for now
+fp_position_x = 0; 
+fp_position_y = 0;
 fp_threshold = 2;
 fp_acq = 2000;
 fp_hold = 500; % set to fixed value for now
 iti_time = 1200;
 invalid_timeout = 1000;
-editable('fp_size','tg_size','fp_threshold','fp_acq','fp_hold','iti_time','invalid_timeout');
+editable('fp_size','tg_size','fp_threshold','fp_acq','fp_hold','iti_time','invalid_timeout','fp_position_x','fp_position_y');
 editable('-color', {'fp_color','tg_color'});
 
 if isfield(TrialRecord.User,'tgPos') %&& isfield(TrialRecord.User,'imgScale') && isfield(TrialRecord.User,'imgAngle')
@@ -37,7 +38,7 @@ fp_graphic = CircleGraphic(null_);
 fp_graphic.Size = fp_size; % The settings denote a radius rather than diameter
 fp_graphic.FaceColor = fp_color;
 fp_graphic.EdgeColor = fp_graphic.FaceColor;
-fp_graphic.Position = fp_position;
+fp_graphic.Position = [fp_position_x,fp_position_y];
 
 fp_tgt = SingleTarget(eye_);
 fp_tgt.Target = fp_graphic;
