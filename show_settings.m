@@ -13,7 +13,7 @@ function show_settings(TrialRecord, advance_block)
     if isvalid(fig)
         Settings = fig.UserData.Result;
 
-        save('protocol_settings.mat', 'Settings');
+        save('vgs_settings.mat', 'Settings');
         TrialRecord.User.Settings = Settings;
         fig.Visible = false;
 
