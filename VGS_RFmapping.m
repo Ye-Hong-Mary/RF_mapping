@@ -94,15 +94,15 @@ saccade_end_vgs = NotAdapter(tg_tgt);
 wh_saccade_end_vgs = WaitThenHold(saccade_end_vgs);
 wh_saccade_end_vgs.WaitTime = 0;
 wh_saccade_end_vgs.HoldTime = times.MaximumSaccade;
-wh_saccade_vgs = Sequential(wh_saccade_end_vgs);
-wh_saccade_vgs.add(wh_saccade_end);
+wh_saccade_vgs = Sequential(wh_saccade_start);
+wh_saccade_vgs.add(wh_saccade_end_vgs);
 
 saccade_end_mgs = NotAdapter(invis_tg_tgt);
 wh_saccade_end_mgs = WaitThenHold(saccade_end_mgs);
 wh_saccade_end_mgs.WaitTime = 0;
 wh_saccade_end_mgs.HoldTime = times.MaximumSaccade;
-wh_saccade_mgs = Sequential(wh_saccade_end_mgs);
-wh_saccade_mgs.add(wh_saccade_end);
+wh_saccade_mgs = Sequential(wh_saccade_start);
+wh_saccade_mgs.add(wh_saccade_end_mgs);
 
 %% Behavior codes
 
@@ -140,7 +140,7 @@ scene2 = create_scene(wh2);
 wh3 = WaitThenHold(fp_tgt);
 wh3.WaitTime = 0;
 if Settings.TaskIsVGS
-    wh3.HoldTime = times.TGOnToFPOn;
+    wh3.HoldTime = times.TGOnToFPOff;
 else
     wh3.HoldTime = times.TGOnToTGOff;
 end
@@ -187,7 +187,7 @@ else
     scene4m = create_scene(wh4m);
 
     % Scene 5M: Focus has been maintained, FP off, make a saccade within certain time
-    ad5m = AllContinue(invis_fp_tgt);
+    ad5m = AllContinue(invis_tg_tgt);
     ad5m.add(wh_saccade_mgs);
     scene5m = create_scene(ad5m);
 
