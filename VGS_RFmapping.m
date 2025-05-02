@@ -45,6 +45,13 @@ else
     dashboard(1, sprintf('TG Position = [%.1f %.1f]',trial_type.TGPosition));%TG (%g,%g)', trial_type.TGPosition(1), trial_type.TGPosition(2)));
 end
 
+% stats = TrialRecord.User.Stats;
+% dashboard(3, sprintf('Left Accuracy: %g%% Right Accuracy: %g%% Total Accuracy: %g%%', 100 * stats.ByDirection.Left.Accuracy, 100 * stats.ByDirection.Right.Accuracy, 100 * stats.All.Accuracy));
+
+% [recent_total,recent_L,recent_R] = stats.recentHistory(recent_trlnum);
+% dashboard(4, sprintf('Last %d, Left Accuracy: %g%% Right Accuracy: %g%% Total Accuracy: %g%%  ', recent_trlnum, 100 * recent_L.Accuracy, 100 * recent_R.Accuracy, 100 * recent_total.Accuracy));
+
+
 %% Construct graphics
 
 
@@ -81,44 +88,30 @@ tg_tgt = SingleTarget(eye_);
 tg_tgt.Target = tg_graphic;
 tg_tgt.Threshold = Settings.TG.Threshold;
 
-invis_tg_tgt = SingleTarget(eye_);
-invis_tg_tgt.Target = trial_type.TGPosition;
-invis_tg_tgt.Threshold = Settings.TG.Threshold;
 
 saccade_start = NotAdapter(invis_fp_tgt);
 wh_saccade_start = WaitThenHold(saccade_start);
 wh_saccade_start.WaitTime = times.ResponseWindow;
 wh_saccade_start.HoldTime = 0;
 
-saccade_end_vgs = NotAdapter(tg_tgt);
-wh_saccade_end_vgs = WaitThenHold(saccade_end_vgs);
-wh_saccade_end_vgs.WaitTime = 0;
-wh_saccade_end_vgs.HoldTime = times.MaximumSaccade;
-wh_saccade_vgs = Sequential(wh_saccade_end_vgs);
-wh_saccade_vgs.add(wh_saccade_end);
+saccade_end = NotAdapter(tg_tgt);
+wh_saccade_end = WaitThenHold(saccade_end);
+wh_saccade_end.WaitTime = 0;
+wh_saccade_end.HoldTime = times.MaximumSaccade;
 
-saccade_end_mgs = NotAdapter(invis_tg_tgt);
-wh_saccade_end_mgs = WaitThenHold(saccade_end_mgs);
-wh_saccade_end_mgs.WaitTime = 0;
-wh_saccade_end_mgs.HoldTime = times.MaximumSaccade;
-wh_saccade_mgs = Sequential(wh_saccade_end_mgs);
-wh_saccade_mgs.add(wh_saccade_end);
+wh_saccade = Sequential(wh_saccade_start);
+wh_saccade.add(wh_saccade_end);
 
 %% Behavior codes
 
 bhv_code(1, 'Acquire FP', 2, 'FP hold', 3, 'TG on to FP off', 4, 'Invalid trial', 6, 'Correct response'); % Shared between task types
-bhv_code(106, 'Response window', 107, 'TG hold to reward');                      % VGS task events
-bhv_code(108, 'TG off to FP Off', 109, 'FP off Response Window', 110, 'TG hold to reward'); % MGS task events
-bhv_code(15, 'VGS Task', 16, 'MGS Task');
+bhv_code(106, 'Response window', 107, 'TG hold to reward');                      % Delay task events
+bhv_code(15, 'VGS Task');
 bhv_code(100, 'Blank screen'); % the end of a task
 % bhv_code(204, 'Response prohibited', 205, 'Response window, GP on', 206, 'Response window, GP off', 207, 'TG hold to reward');    % Reaction task events
 
 %% Scene 0: mark the task
-if Settings.TaskIsVGS
-    eventmarker(15);
-else
-    eventmarker(16);
-end
+eventmarker(15);
 
 %% Scene 1: Starting the trial and acquiring focus
 
@@ -136,74 +129,39 @@ wh2.HoldTime = times.FPHold;
 
 scene2 = create_scene(wh2);
 
-%% Scene 3: Focus has been maintained, target appear
+%% Scene 3: Focus has been maintained, targets appear
+% Q: Should this be part of the reaction task?
+
 wh3 = WaitThenHold(fp_tgt);
 wh3.WaitTime = 0;
-if Settings.TaskIsVGS
-    wh3.HoldTime = times.TGOnToFPOn;
-else
-    wh3.HoldTime = times.TGOnToTGOff;
-end
+wh3.HoldTime = times.TGOnToFPOff;
 
 ad3 = AllContinue(wh3);
 ad3.add(tg_graphic);
 
 scene3 = create_scene(ad3);
 
-%% Scene 4-5 Differ between VGS and MGS
-% Memory guided saccade(MGS)
-% 4M: TG off, focus point remains, focus must remain on FP
-% 5M: FP off, make a saccade within certain time
-%
-% Visually guided saccade(VGS)
-% 4V: FP off; make a saccade
+%% Scene 4: Focus has been maintained long enough, so focus point off; make a saccade
+ad4 = AllContinue(tg_tgt);
 
-if Settings.TaskIsVGS
-    
-    % Scence 4V: Focus has been maintained, FP off, make a saccade within certain time
-    ad4v = AllContinue(tg_tgt);
-    ad4v.add(wh_saccade_vgs);
-    scene4v = create_scene(ad4v);
+ad4.add(wh_saccade);
 
-    % Scene 7v: Until the time has elapsed, must not touch outside the region of the target
-    scene7_enabled = isstruct(Settings.Timing.TGHoldToReward) || (times.TGHoldToReward > 0);
+scene4 = create_scene(ad4);
 
-    if scene7_enabled
-        wh7v = WaitThenHold(NotAdapter(tg_tgt));
-        wh7v.WaitTime = times.TGHoldToReward; % If using a reaction-dependent timing curve, this will be recalculated
-        wh7v.HoldTime = 0;
 
-        ad7v = AllContinue(tg_graphic);
-        ad7v.add(wh7v);
-        scene7v = create_scene(ad7v);
-    end
+%% Scene 7: Until the time has elapsed, must not touch outside the region of the target
 
-else
+scene7_enabled = isstruct(Settings.Timing.TGHoldToReward) || (times.TGHoldToReward > 0);
 
-    % Scene 4M: Focus has been maintained, target off
-    wh4m = WaitThenHold(fp_tgt);
-    wh4m.WaitTime = 0;
-    wh4m.HoldTime = times.TGOffToFPOff;
-    scene4m = create_scene(wh4m);
+if scene7_enabled
+    wh7 = WaitThenHold(NotAdapter(tg_tgt));
+    wh7.WaitTime = times.TGHoldToReward; % If using a reaction-dependent timing curve, this will be recalculated
+    wh7.HoldTime = 0;
 
-    % Scene 5M: Focus has been maintained, FP off, make a saccade within certain time
-    ad5m = AllContinue(invis_fp_tgt);
-    ad5m.add(wh_saccade_mgs);
-    scene5m = create_scene(ad5m);
-
-    % Scene 7M: Until the time has elapsed, must not touch outside the region of the target
-    scene7_enabled = isstruct(Settings.Timing.TGHoldToReward) || (times.TGHoldToReward > 0);
-
-    if scene7_enabled
-        wh7m = WaitThenHold(NotAdapter(invis_tg_tgt));
-        wh7m.WaitTime = times.TGHoldToReward; % If using a reaction-dependent timing curve, this will be recalculated
-        wh7m.HoldTime = 0;       
-
-        scene7m = create_scene(wh7m);
-    end
+    ad7 = AllContinue(tg_graphic);
+    ad7.add(wh7);
+    scene7 = create_scene(ad7);
 end
-
-%
 
 %% Blanking: Since Monkey Logic doesn't change the screen unless directed, a small blank scene is inserted before the ITI
 
@@ -236,7 +194,7 @@ if continue_trial
 end
 
 if continue_trial
-    dashboard(2, 'TG on');
+    dashboard(2, 'TG on to FP off');
     run_scene(scene3, 3);
     if ~wh3.Success
         onInvalidTrial(TrialRecord, 'Failure to maintain focus when targets appear', 5, 4);
@@ -244,15 +202,14 @@ if continue_trial
     end
 end
 
-if Settings.TaskIsVGS
 
     if continue_trial
-        dashboard(2, 'FP off, Response window');
+        dashboard(2, 'Response window');
         tg_tgt.Target = tg_graphic;
-        response_window_start = run_scene(scene4v, 106);
+        response_window_start = run_scene(scene4, 106);
         % keyboard
         if wh_saccade_start.Success 
-            if ~wh_saccade_end_vgs.Success
+            if ~wh_saccade_end.Success
                 rt = wh_saccade_start.AcquiredTime - response_window_start;
                 if scene7_enabled
                     wh7.WaitTime = fuzz(Settings.Timing.TGHoldToReward);%, trialtime - response_window_start, Settings.Timing.ResponseWindow);
@@ -273,61 +230,15 @@ if Settings.TaskIsVGS
     if continue_trial
         dashboard(2, 'TG Hold to Reward');
         % tg_tgt.Target = tg_graphic;
-        run_scene(scene7v, 107);
-        if ~wh7v.Success
+        run_scene(scene7, 107);
+        if ~wh7.Success
             onCorrectTrial(TrialRecord, 'Success', 6);
         else
             onInvalidTrial(TrialRecord, 'Failure to maintain focus during TG hold to reward', 7, 4);
         end
         continue_trial = false;
     end
-    
-else
 
-    if continue_trial
-        dashboard(2, 'TG off');
-        run_scene(scene4m, 108);
-        if ~wh4m.Success
-            onInvalidTrial(TrialRecord, 'Failure to maintain focus when targets disappear', 8, 4);
-            continue_trial = false;
-        end
-    end
-
-
-    if continue_trial
-        dashboard(2, 'FP Off, Response window');
-        invis_tg_tgt.Target = trial_type.TGPosition;
-        response_window_start = run_scene(scene5m, 109);
-        if wh_saccade_start.Success 
-            if ~wh_saccade_end_mgs.Success
-                rt = wh_saccade_start.AcquiredTime - response_window_start;
-                if scene7_enabled
-                    wh7.WaitTime = fuzz(Settings.Timing.TGHoldToReward);%, trialtime - response_window_start, Settings.Timing.ResponseWindow);
-                else
-                    onCorrectTrial(TrialRecord, 'Success', 6);
-                    continue_trial = false;
-                end
-            else 
-                onInvalidTrial(TrialRecord, 'Maximum saccade time elapsed without selection', 2, 4);
-                continue_trial = false;
-            end
-        else
-            onInvalidTrial(TrialRecord, 'Failure to saccade', 1, 4);
-            continue_trial = false;
-        end
-    end
-
-    if continue_trial
-        dashboard(2, 'TG Hold to Reward');
-        run_scene(scene7m, 110);
-        if ~wh7m.Success
-            onCorrectTrial(TrialRecord, 'Success', 6);
-        else
-            onInvalidTrial(TrialRecord, 'Failure to maintain focus during TG hold to reward', 7, 4);
-        end
-        continue_trial = false;
-    end
-end
 
 blank_tc.Duration = max(blank_tc.Duration, TrialRecord.User.timeout_duration);
 run_scene(blank, TrialRecord.User.final_eventcode);
