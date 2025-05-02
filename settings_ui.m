@@ -23,16 +23,6 @@ if ~isfield(Settings,'eccens')
     Settings.eccens = [3.5 5 7 10];
 end
 
-if ~isfield(Settings,'TaskIsVGS')
-    Settings.TaskIsVGS = 1;
-end
-if ~isfield(Settings.Timing,'TGOnToTGOff')
-    Settings.Timing.TGOnToTGOff = 200;
-end
-
-if ~isfield(Settings.Timing,'TGOffToFPOff')
-    Settings.Timing.TGOffToFPOff = 200;
-end
 
 % For convenience, some things will be grouped / scaled differently in the UI than in the Settings struct
 Settings.Reward.Duration = Settings.Timing.RewardDuration;
@@ -255,13 +245,13 @@ MainUI.Visible = true;
         parent = src.Parent;
         parent.UserData.TaskIsVGS = strcmp(src.Value, 'VGS');
         if parent.UserData.TaskIsVGS
-            parent.RowHeight{4} = 'fit';
-            parent.RowHeight{5} = 0;
-            parent.RowHeight{6} = 0';
-        else
+            parent.RowHeight{3} = 'fit';
             parent.RowHeight{4} = 0;
             parent.RowHeight{5} = 'fit';
-            parent.RowHeight{6} = 'fit';
+        else
+            parent.RowHeight{3} = 0;
+            parent.RowHeight{4} = 'fit';
+            parent.RowHeight{5} = 'fit';
         end
     end
 
@@ -473,10 +463,9 @@ MainUI.Visible = true;
 
         Settings.RewardProbability = all_values.Reward.Probability;
 
-        timing = findobj(fig, 'Tag', 'Timing');
         tasktype_dd = findobj(timing, 'Tag', 'TaskType');
         Settings.TaskIsVGS = strcmp(tasktype_dd.Value, 'VGS');
-        times = {'AcquireFP', 'FPHold', 'TGOnToFPOff','TGOnToTGOff','TGOffToFPOff', 'ResponseWindow', 'MaximumSaccade', 'TGHoldToReward', 'InterTrialInterval', 'InvalidTimeout'};
+        times = {'AcquireFP', 'FPHold', 'TGOnToFPOff', 'ResponseWindow', 'MaximumSaccade', 'TGHoldToReward', 'InterTrialInterval', 'InvalidTimeout'};
         for i = 1:length(times)
             Settings.Timing.(times{i}) = findobj(fig, 'Tag', times{i}).UserData.Time;
         end
