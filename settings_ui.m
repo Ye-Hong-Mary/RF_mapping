@@ -241,29 +241,45 @@ MainUI.Visible = true;
         grid.UserData.FuzzType = dd.Value;
     end
 
+    function onTaskType(src, ~)
+        parent = src.Parent;
+        parent.UserData.TaskIsVGS = strcmp(src.Value, 'VGS');
+        if parent.UserData.TaskIsVGS
+            parent.RowHeight{3} = 'fit';
+            parent.RowHeight{4} = 0;
+            parent.RowHeight{5} = 'fit';
+        else
+            parent.RowHeight{3} = 0;
+            parent.RowHeight{4} = 'fit';
+            parent.RowHeight{5} = 'fit';
+        end
+    end
 
     function grid = taskTimeControls(parent, cfg)
         grid = buildColumn(parent, ...
+            @uidropdown, {'Items', {'VGS', 'MGS'}, 'Tag', 'TaskType', 'ValueChangedFcn', @onTaskType}, ...
             @timeControl, {'Acquire FP', 'AcquireFP', cfg.Timing.AcquireFP}, ...
             @timeControl, {'FP Hold', 'FPHold', cfg.Timing.FPHold, true}, ...
             @timeControl, {'TG On to FP Off', 'TGOnToFPOff', cfg.Timing.TGOnToFPOff, true}, ...
+            @timeControl, {'TG On to TG Off', 'TGOnToTGOff', cfg.Timing.TGOnToTGOff, true}, ...
+            @timeControl, {'TG Off to FP Off', 'TGOffToFPOff', cfg.Timing.TGOffToFPOff, true}, ...
             @timeControl, {'Response Window', 'ResponseWindow', cfg.Timing.ResponseWindow}, ...
             @timeControl, {'Maximum Saccade Time', 'MaximumSaccade', cfg.Timing.MaximumSaccade}, ...
             @timeControl, {'TG Hold to Reward', 'TGHoldToReward', cfg.Timing.TGHoldToReward, true}, ...
             @timeControl, {'Invalid Timeout', 'InvalidTimeout', cfg.Timing.InvalidTimeout, true}, ...
             @timeControl, {'Inter-Trial Time', 'InterTrialInterval', cfg.Timing.InterTrialInterval, true} ...
             );
+        grid.UserData.TaskIsVGS = cfg.TaskIsVGS;
         grid.Tag = 'Timing';
 
+        dd = findobj(grid, 'Tag', 'TaskType');
+        if cfg.TaskIsVGS
+            dd.Value = 'VGS';
+        else
+            dd.Value = 'MGS';
+        end
+        onTaskType(dd);
     end
-
-% function s = summarizeBlock(Block)
-%     s = 0;
-%     for i = 1:length(Block)
-%         s = s + Block{i}.TrialCount;
-%     end
-%     s = sprintf('%d target locations with a total of %d trials per block', length(Block), s);
-% end
 
     function addRow(src, ~)
         parent = src.Parent;
@@ -446,6 +462,9 @@ MainUI.Visible = true;
         Settings.RepeatStimulusInvalid = strcmp(repeat_stim.Value, 'Invalid Trials') ;
 
         Settings.RewardProbability = all_values.Reward.Probability;
+
+        tasktype_dd = findobj(timing, 'Tag', 'TaskType');
+        Settings.TaskIsVGS = strcmp(tasktype_dd.Value, 'VGS');
         times = {'AcquireFP', 'FPHold', 'TGOnToFPOff', 'ResponseWindow', 'MaximumSaccade', 'TGHoldToReward', 'InterTrialInterval', 'InvalidTimeout'};
         for i = 1:length(times)
             Settings.Timing.(times{i}) = findobj(fig, 'Tag', times{i}).UserData.Time;
