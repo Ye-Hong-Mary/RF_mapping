@@ -82,7 +82,11 @@ tg_tgt.Target = tg_graphic;
 tg_tgt.Threshold = Settings.TG.Threshold;
 
 invis_tg_tgt = SingleTarget(eye_);
-invis_tg_tgt.Target = trial_type.TGPosition;
+if Settings.handmap
+    invis_tg_tgt.Target = tgPos;
+else
+    invis_tg_tgt.Target = trial_type.TGPosition;
+end
 invis_tg_tgt.Threshold = Settings.TG.Threshold;
 
 saccade_start = NotAdapter(invis_fp_tgt);
